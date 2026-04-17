@@ -1,4 +1,4 @@
-# SilesiaID — V001 · V002 · V003
+# SilesiaID — V001 · V002 · V003 · V004 (w toku)
 
 Jeden cyfrowy dokument zamiast stosu papierów.  
 Raz się weryfikujesz, wszędzie jesteś rozpoznany.
@@ -60,6 +60,23 @@ Wersja `V003` obejmuje domknięcie backendu API zgodnie z planem (`Dokumenty/Pla
 
 Pętla backendowa do testów: `verify-nip` → `issue-cert` → `verify/:certId` (szczegóły i `curl` w `PlanDevelopmentu.md`).
 
+## V004 — Faza 3.1 (frontend Next.js)
+
+- Next.js 16 (App Router), TypeScript, Tailwind, alias `@/*`
+- Zależności: `@privy-io/react-auth`, `wagmi`, `viem`, `qrcode.react`, `swr`
+- Konfiguracja w `frontend/.env.local` i `frontend/.env` (m.in. `NEXT_PUBLIC_PRIVY_APP_ID`, `NEXT_PUBLIC_BACKEND_URL`, adres kontraktu, `NEXT_PUBLIC_CHAIN_ID=11155111`)
+- Szablon: `frontend/.env.local.example` (commitowalny; pliki `.env*` nadal ignorowane z wyjątkiem `*.example`)
+- **3.2:** `app/providers.tsx` (Privy + Sepolia), `lib/api.ts`, `layout` z metadanymi SilesiaID, prosta strona `/` z logowaniem Privy
+- **3.3:** landing (`/`) z opisem 3 kroków, CTA „Zacznij — zaloguj się przez e-mail”, po zalogowaniu redirect na `/onboarding` (formularz NIP w 3.4)
+
+Uruchomienie UI lokalnie:
+
+```bash
+cd frontend && npm run dev
+```
+
+Otwórz `http://localhost:3000` (domyślna strona startowa Next.js). Backend: `cd backend && npm run dev` na porcie `3001`.
+
 ## Jak dodać wersję na GitHub (tag)
 
 Przykład dla `V003`:
@@ -72,10 +89,10 @@ Przykład dla `V003`:
 
 ## Najbliższe kroki
 
-1. **Faza 3** — frontend Next.js (Privy, flow NIP, strona verify, QR)
+1. **Krok 3.4+** — onboarding NIP, strona verify / QR (plan w `PlanDevelopmentu.md`)
 2. Demo end-to-end w przeglądarce: NIP → certyfikat → QR → weryfikacja
 3. Deploy (np. Vercel + Railway) według planu
 
 ## Status
 
-Etap: `V003 / backend API gotowy (Faza 2 do 2.7 włącznie), frontend do wdrożenia`.
+Etap: `V004 / 3.1–3.3 gotowe (Next.js + Privy + landing); kolejny krok: 3.4 onboarding NIP`.
