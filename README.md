@@ -1,4 +1,4 @@
-# SilesiaID — V001 / V002 (in progress)
+# SilesiaID — V001 · V002 · V003
 
 Jeden cyfrowy dokument zamiast stosu papierów.  
 Raz się weryfikujesz, wszędzie jesteś rozpoznany.
@@ -16,7 +16,7 @@ Projekt startuje jako inicjatywa hackathonowa (ETHSilesia 2026), z celem przejś
 
 Wersja `V001` definiuje:
 - problem i wartość biznesową,
-- strategiczny kierunek (anchor partner -> skala -> efekt sieciowy),
+- strategiczny kierunek (anchor partner → skala → efekt sieciowy),
 - bazowe artefakty dokumentacyjne projektu.
 
 ## Dokumentacja
@@ -24,6 +24,7 @@ Wersja `V001` definiuje:
 - `Dokumenty/Projekt.md` — opis projektu i roadmapa
 - `Dokumenty/Strategia.md` — strategia produktu, ICP, GTM, ryzyka i wizja
 - `Dokumenty/Produkt.md` — skrócona specyfikacja produktu (V001)
+- `Dokumenty/PlanDevelopmentu.md` — plan implementacji krok po kroku
 
 ## Założenia strategiczne (skrót)
 
@@ -32,37 +33,49 @@ Wersja `V001` definiuje:
 - certyfikat należy do firmy, nie do platformy
 - priorytetem jest adopcja instytucjonalna (bank/duży partner) jako dźwignia wzrostu
 
-## V002 — co jest już przygotowane
+## V002 — smart contract + Sepolia
 
-W ramach startu technicznego pod `V002` zostało przygotowane:
-- monorepo: `frontend/`, `backend/`, `contracts/`,
-- konfiguracja środowiska (`backend/.env.example`, `frontend/.env.local.example`, `contracts/.env.example`),
-- smart contract `SilesiaID.sol` (ERC721 soulbound),
-- testy kontraktu (3/3 zielone),
-- deploy kontraktu na Sepolia.
+- monorepo: `frontend/`, `backend/`, `contracts/`
+- konfiguracja środowiska (`backend/.env.example`, `frontend/.env.local.example`, `contracts/.env.example`)
+- smart contract `SilesiaID.sol` (ERC721 soulbound), testy Hardhat (3/3)
+- deploy na Sepolia
 
-Adres kontraktu Sepolia:
-- `0xc88aA21A71d0fEebcFF88e0013125D324A81bC11`
+Adres kontraktu Sepolia: `0xc88aA21A71d0fEebcFF88e0013125D324A81bC11`
 
-## Jak dodać nową wersję na GitHub (prosto)
+## V003 — zrealizowane kroki (podsumowanie)
 
-Po podpięciu zdalnego repozytorium:
+Wersja `V003` obejmuje domknięcie backendu API zgodnie z planem (`Dokumenty/PlanDevelopmentu.md` — Faza 2).
+
+| Obszar | Co zrobiono |
+|--------|-------------|
+| **Faza 0** | Struktura monorepo, `.gitignore`, pliki `.env` / `.env.example` |
+| **Faza 1** | Hardhat, `SilesiaID.sol`, testy, deploy Sepolia, `hardhat.config.ts`, skrypt `deploy.ts` |
+| **2.1** | Backend Express + TypeScript: `GET /health`, routery, skrypty `dev` / `build` / `start` |
+| **2.2** | SQLite: `schema.ts`, tabele `certs` i `verify_events`, `initDB()` przy starcie |
+| **2.3** | Stuby API: `POST /verify-nip`, `POST /issue-cert`, `GET /verify/:certId` |
+| **2.4** | Mock firm (`mockData`), `vatApi`, `registries` (mock + ścieżki real), integracja z `verify-nip` |
+| **2.5** | `certIdGenerator`, `blockchain.ts` (`mintCertificate`, `verifyOnChain`) |
+| **2.6** | Pełny `POST /issue-cert`: duplikat NIP, mint on-chain (z graceful fallback), zapis do DB |
+| **2.7** | Pełny `GET /verify/:certId`: odczyt z DB, świeże dane z rejestrów, log `verify_events` |
+
+Pętla backendowa do testów: `verify-nip` → `issue-cert` → `verify/:certId` (szczegóły i `curl` w `PlanDevelopmentu.md`).
+
+## Jak dodać wersję na GitHub (tag)
+
+Przykład dla `V003`:
 
 1. `git add .`
-2. `git commit -m "release: przygotowanie V002 (smart contract + deploy sepolia)"`
-3. `git tag -a v0.0.2 -m "V002"`
+2. `git commit -m "release: V003 backend API (issue + verify loop)"`
+3. `git tag -a v0.0.3 -m "V003"`
 4. `git push origin main`
-5. `git push origin v0.0.2`
-
-To tworzy czytelną wersję `V002` jako commit + tag.
+5. `git push origin v0.0.3`
 
 ## Najbliższe kroki
 
-1. MVP demo end-to-end: NIP -> dane rejestrowe -> certyfikat -> QR -> weryfikacja
-2. Rozmowy z anchor partnerem pilotażowym
-3. Definicja API weryfikacyjnego i modelu integracji
-4. Integracja backendu z kontraktem i endpointami issue/verify
+1. **Faza 3** — frontend Next.js (Privy, flow NIP, strona verify, QR)
+2. Demo end-to-end w przeglądarce: NIP → certyfikat → QR → weryfikacja
+3. Deploy (np. Vercel + Railway) według planu
 
 ## Status
 
-Etap: `V002 / smart contract gotowy + deploy na Sepolia`.
+Etap: `V003 / backend API gotowy (Faza 2 do 2.7 włącznie), frontend do wdrożenia`.
