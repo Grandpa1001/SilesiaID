@@ -1,11 +1,13 @@
-import { BusinessIdentity, MOCK_COMPANIES } from "./mockData";
+import type { BusinessIdentity } from "../types/businessIdentity";
+import { MOCK_COMPANIES } from "./mockData";
+import { fetchCeidgBusinessByNip } from "./ceidgApi";
 
 export async function fetchBusinessData(nip: string): Promise<BusinessIdentity | null> {
   if (process.env.MOCK_MODE === "true") {
     return MOCK_COMPANIES[nip] ?? null;
   }
 
-  // Prawdziwa integracja KRS (api.rejestry.net)
+  // 1) KRS — zewnętrzne API (np. rejestry.net): w praktyce zwykle wymaga klucza u dostawcy.
   try {
     const krsRes = await fetch(`https://api.rejestry.net/api/krs/entities?nip=${nip}`);
     if (krsRes.ok) {
@@ -20,12 +22,17 @@ export async function fetchBusinessData(nip: string): Promise<BusinessIdentity |
           address: data.entity.address ?? { city: "", street: "", postCode: "", voivodeship: "" },
           vatActive: true,
           trustLevel: 2,
+          registrySource: "krs",
         };
       }
     }
   } catch {}
 
-  // Fallback: Biala Lista VAT (kazda firma z NIP-em)
+  // 2) CEIDG — mocki (CEIDG_MOCK_MODE) albo API Biznes.gov.pl (CEIDG_API_KEY); JDG bez KRS.
+  const fromCeidg = await fetchCeidgBusinessByNip(nip);
+  if (fromCeidg) return fromCeidg;
+
+  // 3) Biała lista VAT (MF) — publiczne API po NIP; bez osobnego „wniosku” jak w CEIDG API.
   try {
     const today = new Date().toISOString().split("T")[0];
     const vatRes = await fetch(`https://wl-api.mf.gov.pl/api/search/nip/${nip}?date=${today}`);
@@ -42,6 +49,7 @@ export async function fetchBusinessData(nip: string): Promise<BusinessIdentity |
           address: { city: subject.residenceAddress ?? "", street: "", postCode: "", voivodeship: "" },
           vatActive: subject.statusVat === "Czynny",
           trustLevel: 1,
+          registrySource: "vat",
         };
       }
     }

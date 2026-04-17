@@ -68,6 +68,10 @@ Pętla backendowa do testów: `verify-nip` → `issue-cert` → `verify/:certId`
 - Szablon: `frontend/.env.local.example` (commitowalny; pliki `.env*` nadal ignorowane z wyjątkiem `*.example`)
 - **3.2:** `app/providers.tsx` (Privy + Sepolia), `lib/api.ts`, `layout` z metadanymi SilesiaID, prosta strona `/` z logowaniem Privy
 - **3.3:** landing (`/`) z opisem 3 kroków, CTA „Zacznij — zaloguj się przez e-mail”, po zalogowaniu redirect na `/onboarding` (formularz NIP w 3.4)
+- **3.4:** `/onboarding` — NIP → potwierdzenie danych → sukces z QR (`SuccessScreen`), `issue-cert` z adresem portfela Privy
+- **3.5:** `/verify/[certId]` — SSR, dane z API backendu, baner statusu, link do tx na Sepolia Etherscan
+- **4.2:** `/dashboard` — stub panelu firmy (chroniony sesją Privy, linki do onboarding i wylogowanie)
+- **4.3:** KRS → **CEIDG** (opcjonalnie API Biznes.gov.pl) → VAT; mock JDG `7777777777`; badge źródła danych w onboarding
 
 Uruchomienie UI lokalnie:
 
@@ -89,10 +93,9 @@ Przykład dla `V003`:
 
 ## Najbliższe kroki
 
-1. **Krok 3.4+** — onboarding NIP, strona verify / QR (plan w `PlanDevelopmentu.md`)
-2. Demo end-to-end w przeglądarce: NIP → certyfikat → QR → weryfikacja
-3. Deploy (np. Vercel + Railway) według planu
+1. **Faza 5** — deploy backendu (Railway) i frontendu (Vercel) wg `PlanDevelopmentu.md`
+2. Demo end-to-end w przeglądarce (Privy + pełna ścieżka UI), jeśli jeszcze nie domknięte
 
 ## Status
 
-Etap: `V004 / 3.1–3.3 gotowe (Next.js + Privy + landing); kolejny krok: 3.4 onboarding NIP`.
+Etap: `V004 / Faza 4 testy + dashboard (4.2); kolejna: Faza 5 deploy`.
