@@ -1,4 +1,4 @@
-# SilesiaID — V001
+# SilesiaID — V001 / V002 (in progress)
 
 Jeden cyfrowy dokument zamiast stosu papierów.  
 Raz się weryfikujesz, wszędzie jesteś rozpoznany.
@@ -32,13 +32,37 @@ Wersja `V001` definiuje:
 - certyfikat należy do firmy, nie do platformy
 - priorytetem jest adopcja instytucjonalna (bank/duży partner) jako dźwignia wzrostu
 
+## V002 — co jest już przygotowane
+
+W ramach startu technicznego pod `V002` zostało przygotowane:
+- monorepo: `frontend/`, `backend/`, `contracts/`,
+- konfiguracja środowiska (`backend/.env.example`, `frontend/.env.local.example`, `contracts/.env.example`),
+- smart contract `SilesiaID.sol` (ERC721 soulbound),
+- testy kontraktu (3/3 zielone),
+- deploy kontraktu na Sepolia.
+
+Adres kontraktu Sepolia:
+- `0xc88aA21A71d0fEebcFF88e0013125D324A81bC11`
+
+## Jak dodać nową wersję na GitHub (prosto)
+
+Po podpięciu zdalnego repozytorium:
+
+1. `git add .`
+2. `git commit -m "release: przygotowanie V002 (smart contract + deploy sepolia)"`
+3. `git tag -a v0.0.2 -m "V002"`
+4. `git push origin main`
+5. `git push origin v0.0.2`
+
+To tworzy czytelną wersję `V002` jako commit + tag.
+
 ## Najbliższe kroki
 
 1. MVP demo end-to-end: NIP -> dane rejestrowe -> certyfikat -> QR -> weryfikacja
 2. Rozmowy z anchor partnerem pilotażowym
 3. Definicja API weryfikacyjnego i modelu integracji
-4. Przygotowanie pilotażu V002
+4. Integracja backendu z kontraktem i endpointami issue/verify
 
 ## Status
 
-Etap: `V001 / inicjalizacja repozytorium`.
+Etap: `V002 / smart contract gotowy + deploy na Sepolia`.
