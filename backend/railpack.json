@@ -5,7 +5,13 @@
     "node": "22"
   },
   "buildAptPackages": ["python3", "make", "g++"],
-  "deploy": {
-    "startCommand": "node dist/index.js"
+  "steps": {
+    "install": {
+      "commands": ["npm ci"]
+    },
+    "build": {
+      "inputs": [{ "step": "install" }],
+      "commands": ["npm run build"]
+    }
   }
 }

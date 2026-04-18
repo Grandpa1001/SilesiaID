@@ -5,6 +5,7 @@
     "watchPatterns": ["backend/**", "railway.json"]
   },
   "deploy": {
+    "startCommand": "node dist/index.js",
     "healthcheckPath": "/health"
   }
 }
