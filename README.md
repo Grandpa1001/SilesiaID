@@ -1,101 +1,114 @@
-# SilesiaID — V001 · V002 · V003 · V004 (w toku)
+# SilesiaID
 
 Jeden cyfrowy dokument zamiast stosu papierów.  
 Raz się weryfikujesz, wszędzie jesteś rozpoznany.
 
 ## Czym jest SilesiaID
 
-SilesiaID to projekt infrastruktury tożsamości biznesowej dla firm:
-- firma tworzy certyfikat tożsamości raz,
-- instytucje (banki, urzędy, kontrahenci) weryfikują go wielokrotnie,
-- dane są aktualne i sprawdzalne w kilka sekund.
+SilesiaID to infrastruktura tożsamości biznesowej:
+- firma weryfikuje się raz i otrzymuje certyfikat (NFT soulbound na Sepolia),
+- instytucje (banki, urzędy, kontrahenci) weryfikują go w kilka sekund,
+- dane są zawsze aktualne — pobierane live z CEIDG / VAT.
 
-Projekt startuje jako inicjatywa hackathonowa (ETHSilesia 2026), z celem przejścia do pilotażu z partnerami instytucjonalnymi.
+Projekt hackathonowy ETHSilesia 2026, z celem przejścia do pilotażu z partnerami instytucjonalnymi.
 
-## V001 — zakres tej wersji
+---
 
-Wersja `V001` definiuje:
-- problem i wartość biznesową,
-- strategiczny kierunek (anchor partner → skala → efekt sieciowy),
-- bazowe artefakty dokumentacyjne projektu.
+## Jak działa aplikacja
 
-## Dokumentacja
+### Ścieżka przedsiębiorcy
 
-- `Dokumenty/Projekt.md` — opis projektu i roadmapa
-- `Dokumenty/Strategia.md` — strategia produktu, ICP, GTM, ryzyka i wizja
-- `Dokumenty/Produkt.md` — skrócona specyfikacja produktu (V001)
-- `Dokumenty/PlanDevelopmentu.md` — plan implementacji krok po kroku
+1. **Landing (`/`)** — opis produktu, CTA „Zaloguj się przez e-mail"
+2. **Logowanie** — Privy (email / SMS), tworzy embedded wallet Ethereum
+3. **Onboarding (`/onboarding`)** — wpisz NIP → backend weryfikuje w CEIDG/VAT → potwierdzenie danych firmy → mint certyfikatu jako NFT soulbound na Sepolia
+4. **Sukces** — QR kod certyfikatu + link do transakcji na Etherscan
+5. **Dashboard (`/dashboard`)** — panel firmy: status certyfikatu, historia weryfikacji, wylogowanie
 
-## Założenia strategiczne (skrót)
+### Ścieżka instytucji
 
-- SilesiaID to infrastruktura, nie aplikacja dokumentowa
-- blockchain działa w tle (bez ekspozycji technicznej dla użytkownika)
-- certyfikat należy do firmy, nie do platformy
-- priorytetem jest adopcja instytucjonalna (bank/duży partner) jako dźwignia wzrostu
+1. **Login instytucji (`/institution/login`)** — rejestracja lub logowanie emailem
+2. **Weryfikacja (`/institution/verify`)** — wpisz NIP lub cert ID → natychmiastowe dane firmy
+3. **API key** — generowanie klucza do integracji: `GET /api/v1/institution/lookup?q=<nip>`
 
-## V002 — smart contract + Sepolia
+### Publiczna weryfikacja
 
-- monorepo: `frontend/`, `backend/`, `contracts/`
-- konfiguracja środowiska (`backend/.env.example`, `frontend/.env.local.example`, `contracts/.env.example`)
-- smart contract `SilesiaID.sol` (ERC721 soulbound), testy Hardhat (3/3)
-- deploy na Sepolia
+- **`/verify/[certId]`** — każdy może sprawdzić certyfikat: status, dane firmy, link on-chain
 
-Adres kontraktu Sepolia: `0xc88aA21A71d0fEebcFF88e0013125D324A81bC11`
+---
 
-## V003 — zrealizowane kroki (podsumowanie)
+## Stos technologiczny
 
-Wersja `V003` obejmuje domknięcie backendu API zgodnie z planem (`Dokumenty/PlanDevelopmentu.md` — Faza 2).
+| Warstwa | Technologia |
+|---------|-------------|
+| Frontend | Next.js 16 (App Router), TypeScript, Tailwind CSS |
+| Auth | Privy (email/SMS login, embedded wallet) |
+| Backend | Express 5, TypeScript, SQLite (better-sqlite3) |
+| Blockchain | Solidity (ERC721 soulbound), Hardhat, Sepolia testnet |
+| Deploy | Vercel (frontend) + Railway (backend) |
 
-| Obszar | Co zrobiono |
-|--------|-------------|
-| **Faza 0** | Struktura monorepo, `.gitignore`, pliki `.env` / `.env.example` |
-| **Faza 1** | Hardhat, `SilesiaID.sol`, testy, deploy Sepolia, `hardhat.config.ts`, skrypt `deploy.ts` |
-| **2.1** | Backend Express + TypeScript: `GET /health`, routery, skrypty `dev` / `build` / `start` |
-| **2.2** | SQLite: `schema.ts`, tabele `certs` i `verify_events`, `initDB()` przy starcie |
-| **2.3** | Stuby API: `POST /verify-nip`, `POST /issue-cert`, `GET /verify/:certId` |
-| **2.4** | Mock firm (`mockData`), `vatApi`, `registries` (mock + ścieżki real), integracja z `verify-nip` |
-| **2.5** | `certIdGenerator`, `blockchain.ts` (`mintCertificate`, `verifyOnChain`) |
-| **2.6** | Pełny `POST /issue-cert`: duplikat NIP, mint on-chain (z graceful fallback), zapis do DB |
-| **2.7** | Pełny `GET /verify/:certId`: odczyt z DB, świeże dane z rejestrów, log `verify_events` |
+**Adres kontraktu Sepolia:** `0xc88aA21A71d0fEebcFF88e0013125D324A81bC11`
 
-Pętla backendowa do testów: `verify-nip` → `issue-cert` → `verify/:certId` (szczegóły i `curl` w `PlanDevelopmentu.md`).
+---
 
-## V004 — Faza 3.1 (frontend Next.js)
-
-- Next.js 16 (App Router), TypeScript, Tailwind, alias `@/*`
-- Zależności: `@privy-io/react-auth`, `wagmi`, `viem`, `qrcode.react`, `swr`
-- Konfiguracja w `frontend/.env.local` i `frontend/.env` (m.in. `NEXT_PUBLIC_PRIVY_APP_ID`, `NEXT_PUBLIC_BACKEND_URL`, adres kontraktu, `NEXT_PUBLIC_CHAIN_ID=11155111`)
-- Szablon: `frontend/.env.local.example` (commitowalny; pliki `.env*` nadal ignorowane z wyjątkiem `*.example`)
-- **3.2:** `app/providers.tsx` (Privy + Sepolia), `lib/api.ts`, `layout` z metadanymi SilesiaID, prosta strona `/` z logowaniem Privy
-- **3.3:** landing (`/`) z opisem 3 kroków, CTA „Zacznij — zaloguj się przez e-mail”, po zalogowaniu redirect na `/onboarding` (formularz NIP w 3.4)
-- **3.4:** `/onboarding` — NIP → potwierdzenie danych → sukces z QR (`SuccessScreen`), `issue-cert` z adresem portfela Privy
-- **3.5:** `/verify/[certId]` — SSR, dane z API backendu, baner statusu, link do tx na Sepolia Etherscan
-- **4.2:** `/dashboard` — stub panelu firmy (chroniony sesją Privy, linki do onboarding i wylogowanie)
-- **4.3:** KRS → **CEIDG** (opcjonalnie API Biznes.gov.pl) → VAT; mock JDG `7777777777`; badge źródła danych w onboarding
-
-Uruchomienie UI lokalnie:
+## Uruchomienie lokalne
 
 ```bash
-cd frontend && npm run dev
+# Backend (port 3001)
+cd backend && npm install && npm run dev
+
+# Frontend (port 3000)
+cd frontend && npm install && npm run dev
 ```
 
-Otwórz `http://localhost:3000` (domyślna strona startowa Next.js). Backend: `cd backend && npm run dev` na porcie `3001`.
+### Zmienne środowiskowe
 
-## Jak dodać wersję na GitHub (tag)
+**`frontend/.env.local`**
+```
+NEXT_PUBLIC_PRIVY_APP_ID=...
+NEXT_PUBLIC_BACKEND_URL=http://localhost:3001
+NEXT_PUBLIC_CONTRACT_ADDRESS=0xc88aA21A71d0fEebcFF88e0013125D324A81bC11
+NEXT_PUBLIC_CHAIN_ID=11155111
+```
 
-Przykład dla `V003`:
+**`backend/.env`**
+```
+PORT=3001
+SEPOLIA_RPC_URL=...
+CONTRACT_ADDRESS=0xc88aA21A71d0fEebcFF88e0013125D324A81bC11
+DEPLOYER_PRIVATE_KEY=...
+CORS_ORIGIN=http://localhost:3000
+MOCK_MODE=false
+```
 
-1. `git add .`
-2. `git commit -m "release: V003 backend API (issue + verify loop)"`
-3. `git tag -a v0.0.3 -m "V003"`
-4. `git push origin main`
-5. `git push origin v0.0.3`
+---
 
-## Najbliższe kroki
+## Struktura monorepo
 
-1. **Faza 5** — deploy backendu (Railway) i frontendu (Vercel) wg `PlanDevelopmentu.md`
-2. Demo end-to-end w przeglądarce (Privy + pełna ścieżka UI), jeśli jeszcze nie domknięte
+```
+SilesiaID/
+├── frontend/          # Next.js — UI przedsiębiorcy i instytucji
+│   └── app/
+│       ├── page.tsx             # Landing
+│       ├── onboarding/          # Flow NIP → certyfikat
+│       ├── dashboard/           # Panel firmy
+│       ├── verify/[certId]/     # Publiczna weryfikacja
+│       └── institution/         # Login i weryfikacja instytucji
+├── backend/           # Express API
+│   └── src/
+│       ├── routes/              # nip, issue, verify, myCert, revoke, institution*
+│       ├── services/            # blockchain, registries, ceidgApi
+│       └── db/                  # SQLite schema + migracje
+├── contracts/         # Hardhat + SilesiaID.sol (ERC721 soulbound)
+├── railway.json       # Konfiguracja deploy Railway
+└── railpack.json      # Konfiguracja buildu Railpack
+```
 
-## Status
+---
 
-Etap: `V004 / Faza 4 testy + dashboard (4.2); kolejna: Faza 5 deploy`.
+## Deploy
+
+- **Backend:** Railway — root directory `backend`, zmienne env w dashboardzie
+- **Frontend:** Vercel — root directory `frontend`, zmienne `NEXT_PUBLIC_*` w dashboardzie
+
+---
+
