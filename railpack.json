@@ -1,0 +1,14 @@
+{
+  "$schema": "https://schema.railpack.com",
+  "provider": "node",
+  "packages": {
+    "node": "22"
+  },
+  "buildAptPackages": ["python3", "make", "g++"],
+  "build": {
+    "cmds": ["cd backend && npm ci && npm run build"]
+  },
+  "start": {
+    "cmd": "node backend/dist/index.js"
+  }
+}
