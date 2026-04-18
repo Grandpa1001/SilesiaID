@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { INSTITUTION_TOKEN_KEY, institutionLoginOrSignup } from "@/lib/institutionApi";
+import InstitutionHeader from "@/app/components/InstitutionHeader";
 
 export default function InstitutionLoginPage() {
   const router = useRouter();
@@ -29,7 +29,10 @@ export default function InstitutionLoginPage() {
   }
 
   return (
-    <main className="min-h-screen bg-linear-to-b from-slate-50 to-white px-4 py-10">
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
+      <InstitutionHeader />
+
+      <main className="px-4 py-12">
       <div className="mx-auto w-full max-w-md">
         <p className="mb-2 text-center text-xs font-medium uppercase tracking-widest text-primary-dark">
           Panel instytucji
@@ -96,12 +99,8 @@ export default function InstitutionLoginPage() {
           </button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-gray-500">
-          <Link href="/" className="text-primary-dark underline-offset-2 hover:underline">
-            Wróć na stronę główną
-          </Link>
-        </p>
       </div>
-    </main>
+      </main>
+    </div>
   );
 }

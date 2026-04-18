@@ -65,3 +65,10 @@ export function initDB() {
   runMigrations();
   console.log("DB initialized");
 }
+
+/** Usuwa certyfikaty i zdarzenia weryfikacji (konta instytucji bez zmian). */
+export function clearApplicationData() {
+  db.exec("DELETE FROM verify_events");
+  db.exec("DELETE FROM certs");
+  console.log("[db] Wyczyszczono: verify_events, certs");
+}

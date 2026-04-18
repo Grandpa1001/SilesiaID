@@ -81,12 +81,19 @@ contract SilesiaID is ERC721, Ownable {
         return identities[tokenId];
     }
 
+    /// @notice Wycofanie usuwa token z łańcucha i zwalnia adres — ten sam portfel może dostać nowy certyfikat przy kolejnym mint.
     function revoke(string calldata certId) external onlyOwner {
         uint256 tokenId = certIdToTokenId[certId];
         require(tokenId != 0, "Certificate not found");
-        identities[tokenId].isActive = false;
-        identities[tokenId].updatedAt = block.timestamp;
+        address holder = ownerOf(tokenId);
+
         emit IdentityRevoked(tokenId, certId, block.timestamp);
+
+        walletToTokenId[holder] = 0;
+        certIdToTokenId[certId] = 0;
+        delete identities[tokenId];
+
+        _burn(tokenId);
     }
 
     // Soulbound - blokujemy transfery

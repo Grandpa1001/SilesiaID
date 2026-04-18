@@ -4,9 +4,9 @@
   --font-sans: var(--font-inter);
   --font-mono: var(--font-dm-mono);
 
-  --color-primary: #185FA5;
-  --color-primary-dark: #0C447C;
-  --color-primary-light: #E6F1FB;
+  --color-primary: #273E65;
+  --color-primary-dark: #1A2A47;
+  --color-primary-light: #E3E9F2;
   --color-teal: #1D9E75;
   --color-teal-dark: #085041;
   --color-teal-light: #E1F5EE;
@@ -36,7 +36,7 @@ body {
 }
 
 *:focus-visible {
-  outline: 2px solid #185FA5;
+  outline: 2px solid #273E65;
   outline-offset: 2px;
 }
 

@@ -18,6 +18,11 @@ const dmMono = DM_Mono({
 export const metadata: Metadata = {
   title: "SilesiaID — Cyfrowy certyfikat firmy",
   description: "Weryfikujesz się raz — jesteś rozpoznany wszędzie.",
+  icons: {
+    icon: "/SilesiaID_Logo-nobg.svg",
+    shortcut: "/SilesiaID_Logo-nobg.svg",
+    apple: "/SilesiaID_Logo-nobg.svg",
+  },
 };
 
 export default function RootLayout({

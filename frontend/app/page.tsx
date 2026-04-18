@@ -26,8 +26,8 @@ function QRMockSVG() {
       <rect x="4" y="28" width="4" height="4" fill="#1a1a1a"/>
       <rect x="2" y="34" width="4" height="4" fill="#1a1a1a"/>
       <rect x="8" y="22" width="4" height="4" fill="#1a1a1a"/>
-      <rect x="22" y="22" width="16" height="16" rx="1" fill="#E6F1FB"/>
-      <rect x="26" y="26" width="8" height="8" rx="1" fill="#185FA5"/>
+      <rect x="22" y="22" width="16" height="16" rx="1" fill="#E3E9F2"/>
+      <rect x="26" y="26" width="8" height="8" rx="1" fill="#273E65"/>
       <rect x="42" y="22" width="4" height="4" fill="#1a1a1a"/>
       <rect x="48" y="24" width="4" height="4" fill="#1a1a1a"/>
       <rect x="54" y="22" width="4" height="4" fill="#1a1a1a"/>
@@ -59,7 +59,7 @@ function MockCertCard() {
         </span>
         <span
           className="ml-auto shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium"
-          style={{ backgroundColor: "#E6F1FB", color: "#0C447C" }}
+          style={{ backgroundColor: "#E3E9F2", color: "#1A2A47" }}
         >
           KRS — pełny
         </span>
@@ -82,7 +82,7 @@ function MockCertCard() {
           <div className="flex flex-col gap-2">
             {[
               { color: "#1D9E75", label: "Czynny podatnik VAT" },
-              { color: "#185FA5", label: "CEIDG / KRS potwierdzone" },
+              { color: "#273E65", label: "CEIDG / KRS potwierdzone" },
               { color: "#534AB7", label: "Rejestr on-chain ETH" },
             ].map(({ color, label }) => (
               <div key={label} className="flex items-center gap-2">
@@ -124,7 +124,7 @@ export default function Home() {
       <section className="relative overflow-hidden">
         <div
           className="pointer-events-none absolute inset-0"
-          style={{ background: "linear-gradient(160deg, #ffffff 40%, #E6F1FB 100%)" }}
+          style={{ background: "linear-gradient(160deg, #ffffff 40%, #E3E9F2 100%)" }}
         />
         <div className="relative mx-auto max-w-5xl px-4 py-16 md:py-24">
           <div className="flex flex-col items-center gap-12 md:flex-row md:gap-16">
@@ -132,17 +132,18 @@ export default function Home() {
             <div className="flex-1 text-center md:text-left animate-slide-up">
               <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3.5 py-1.5 text-[12px] text-gray-500 shadow-sm">
                 <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-                ETHSilesia 2026 · Katowice
+                Pierwszy w Polsce regionalny standard zaufania biznesowego
               </div>
 
               <h1 className="mb-5 text-[34px] font-medium leading-tight tracking-tight text-gray-900 md:text-[44px]">
-                Jeden cyfrowy dokument<br />
-                <span className="text-primary">zamiast stosu papierów</span>
+                Cyfrowy paszport<br />
+                <span className="text-primary">Twojej firmy na Śląsku</span>
               </h1>
 
               <p className="mb-8 max-w-md text-[16px] leading-relaxed text-gray-500">
                 Weryfikujesz firmę raz — w CEIDG, KRS i Białej liście VAT.
-                Każda instytucja dostaje pewność w 3 sekundy przez kod QR.
+                Urząd, bank, partner B2B dostaje pewność w 3 sekundy przez kod QR.
+                Raz zweryfikowany — wszędzie rozpoznany.
               </p>
 
               <div className="flex flex-col justify-center gap-3 sm:flex-row md:justify-start">
@@ -165,9 +166,21 @@ export default function Home() {
                 </a>
               </div>
 
-              <p className="mt-5 text-[12px] text-gray-400">
-                Bez haseł. Bez specjalnych aplikacji. Logowanie przez e-mail lub SMS.
-              </p>
+              <div className="mt-5 flex flex-col gap-1.5 sm:flex-row sm:gap-4 items-center md:items-start justify-center md:justify-start">
+                <p className="text-[12px] text-gray-400">
+                  Bez haseł. Bez specjalnych aplikacji. Logowanie przez e-mail lub SMS.
+                </p>
+                <a
+                  href="/broszura-silesaid.pdf"
+                  download
+                  className="inline-flex items-center gap-1.5 text-[12px] text-primary-dark hover:text-primary transition-colors"
+                >
+                  <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                  </svg>
+                  Pobierz broszurę PDF
+                </a>
+              </div>
             </div>
 
             {/* Mock cert card */}
@@ -183,9 +196,9 @@ export default function Home() {
         <div className="mx-auto max-w-3xl px-4 py-6">
           <div className="grid grid-cols-3 gap-4 text-center">
             {[
-              { value: "3 min", label: "czas rejestracji" },
-              { value: "3", label: "rejestry publiczne RP" },
-              { value: "1 QR", label: "do każdej weryfikacji" },
+              { value: "−70%", label: "koszt KYC/KYB w banku" },
+              { value: "3 min", label: "do certyfikatu firmy" },
+              { value: "eIDAS 2.0", label: "gotowość regulacyjna UE" },
             ].map(({ value, label }) => (
               <div key={label}>
                 <div className="text-[22px] font-medium text-gray-900">{value}</div>
@@ -200,19 +213,19 @@ export default function Home() {
       <section id="jak-dziala" className="bg-surface py-16">
         <div className="mx-auto max-w-3xl px-4">
           <h2 className="mb-2 text-center text-[22px] font-medium text-gray-900">
-            Jak SilesiaID skraca onboarding firmy
+            Jak SilesiaID eliminuje wąskie gardło biurokracji
           </h2>
           <p className="mb-10 text-center text-[14px] text-gray-500">
-            Przedsiębiorca traci średnio 12 dni roboczych rocznie na formalną weryfikację.
+            Instytucje tracą tysiące roboczogodzin na ręczne sprawdzanie danych, które mogą być nieaktualne w momencie ich czytania. SilesiaID to koniec tego problemu.
           </p>
-          <OnboardingAnimation />
+          <OnboardingAnimation autoLoop />
         </div>
       </section>
 
       {/* Steps */}
       <section className="mx-auto max-w-3xl px-4 py-16">
         <h2 className="mb-10 text-center text-[22px] font-medium text-gray-900">
-          Trzy kroki do certyfikatu
+          Trzy kroki do cyfrowego paszportu
         </h2>
         <div className="grid gap-4 sm:grid-cols-3">
           {[
@@ -238,8 +251,8 @@ export default function Home() {
             },
             {
               num: "3",
-              title: "Dostajesz certyfikat",
-              desc: "Certyfikat z kodem QR — gotowy do pokazania w każdej instytucji.",
+              title: "Dostajesz paszport",
+              desc: "Certyfikat z kodem QR — gotowy do pokazania urzędowi, bankowi lub partnerowi B2B.",
               icon: (
                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5ZM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5ZM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5ZM13.5 14.625c0-.621.504-1.125 1.125-1.125h2.25v2.25h-2.25v-2.25ZM13.5 19.125v2.25h2.25v-2.25H13.5ZM18 14.625h2.25v2.25H18v-2.25ZM18 19.125v2.25h2.25v-2.25H18Z" />
@@ -262,7 +275,64 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Dla instytucji + API (A.6) */}
+      {/* Dla kogo? */}
+      <section className="border-t border-gray-100 bg-surface/40 py-16">
+        <div className="mx-auto max-w-5xl px-4">
+          <h2 className="mb-2 text-center text-[22px] font-medium text-gray-900">
+            Dedykowany dla każdego ogniwa obrotu gospodarczego
+          </h2>
+          <p className="mx-auto mb-10 max-w-2xl text-center text-[14px] text-gray-500">
+            SilesiaID rozwiązuje konkretne problemy decydentów — nie tylko upraszcza technologię.
+          </p>
+          <div className="grid gap-5 md:grid-cols-3">
+            {[
+              {
+                audience: "Urząd Miasta / GZM",
+                tagline: "Smart City w praktyce",
+                desc: "Realizacja strategii cyfryzacji regionu. Śląsk jako lider innowacji w Polsce — dane śląskich firm zabezpieczone w lokalnym ekosystemie zaufania.",
+                icon: (
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008H18v-.008Zm0 3h.008v.008H18v-.008Zm0 3h.008v.008H18v-.008Z" />
+                ),
+                color: "bg-primary-light text-primary",
+              },
+              {
+                audience: "Bank / Fundusz Pożyczkowy",
+                tagline: "−70% kosztu onboardingu KYB",
+                desc: "Eliminacja ryzyka wyłudzeń na fałszywe dokumenty. Jedno zapytanie API zastępuje tygodnie manualnej weryfikacji KRS, CEIDG i zaświadczeń.",
+                icon: (
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0 0 12 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75Z" />
+                ),
+                color: "bg-teal-light text-teal-dark",
+              },
+              {
+                audience: "Duże Firmy Przemysłowe",
+                tagline: "Szybka weryfikacja podwykonawców",
+                desc: "Sprawdzacie kod QR kierowcy lub dostawcy i w 3 sekundy wiecie, że firma jest wiarygodna, aktywna i płaci podatki. Koniec segregatorów dokumentów.",
+                icon: (
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 18.75a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 0 1-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 0 0-3.213-9.193 2.056 2.056 0 0 0-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 0 0-10.026 0 1.106 1.106 0 0 0-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" />
+                ),
+                color: "bg-purple-light text-purple",
+              },
+            ].map((item) => (
+              <div
+                key={item.audience}
+                className="flex flex-col rounded-2xl border border-gray-100 bg-white p-6 shadow-sm"
+              >
+                <div className={`mb-4 flex h-11 w-11 items-center justify-center rounded-2xl ${item.color}`}>
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                    {item.icon}
+                  </svg>
+                </div>
+                <div className="mb-0.5 text-[11px] font-medium uppercase tracking-wider text-gray-400">{item.audience}</div>
+                <h3 className="mb-2 text-[15px] font-medium text-gray-900">{item.tagline}</h3>
+                <p className="text-[13px] leading-relaxed text-gray-500">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Dla instytucji + API */}
       <section className="border-t border-gray-100 bg-white py-16">
         <div className="mx-auto max-w-5xl px-4">
           <h2 className="mb-2 text-center text-[22px] font-medium text-gray-900">
@@ -333,12 +403,12 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Skąd pochodzi pewność? (A.6) */}
+      {/* Skąd pochodzi pewność? */}
       <section className="border-t border-gray-100 bg-surface/60 py-14">
         <div className="mx-auto max-w-4xl px-4">
-          <h2 className="mb-2 text-center text-[20px] font-medium text-gray-900">Skąd pochodzi pewność?</h2>
+          <h2 className="mb-2 text-center text-[20px] font-medium text-gray-900">Cyfrowa pieczęć, której nie da się podrobić</h2>
           <p className="mb-10 text-center text-[14px] text-gray-500">
-            Certyfikat opiera się na jawnych źródłach państwowych i zapisie on-chain.
+            Blockchain to nasza cyfrowa pieczęć. Raz wpisanych danych nie da się zmienić — co eliminuje ryzyko korupcji i błędów ludzkich. Certyfikat opiera się na jawnych źródłach państwowych.
           </p>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {[
@@ -368,7 +438,7 @@ export default function Home() {
               },
               {
                 title: "Blockchain",
-                desc: "Ethereum Sepolia — niezmienny zapis certyfikatu.",
+                desc: "Ethereum — niezmienny zapis. Instytucja dostaje tylko dane, których potrzebuje.",
                 icon: (
                   <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
                 ),
@@ -392,44 +462,61 @@ export default function Home() {
             ))}
           </div>
           <p className="mt-8 text-center text-[11px] text-gray-400">
-            Model zgodny z kierunkiem EBSI / tożsamością rozproszoną w UE.
+            Zgodny z eIDAS 2.0 i kierunkiem EBSI / tożsamości rozproszonej w UE (EUDI Wallet).
           </p>
         </div>
       </section>
 
       {/* CTA bottom */}
-      <section className="py-20 text-center" style={{ background: "linear-gradient(135deg, #185FA5 0%, #0C447C 100%)" }}>
+      <section className="py-20 text-center" style={{ background: "linear-gradient(135deg, #273E65 0%, #1A2A47 100%)" }}>
         <div className="mx-auto max-w-xl px-4">
           <h2 className="mb-3 text-[28px] font-medium text-white">
             Gotowy na cyfrowy paszport firmy?
           </h2>
           <p className="mb-8 text-[15px] text-blue-200">
-            Raz zweryfikowany — wszędzie rozpoznany.
+            Zapraszamy do programu pilotażowego — wdrożymy darmowy węzeł weryfikujący i sprawdzisz, ile czasu oszczędzają Twoi pracownicy.
           </p>
-          <button
-            type="button"
-            onClick={login}
-            disabled={!ready}
-            className="inline-flex items-center gap-2 rounded-xl bg-white px-8 py-4 text-[14px] font-medium text-primary shadow-lg transition-colors hover:bg-blue-50 disabled:opacity-50"
-          >
-            Zacznij bezpłatnie
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
-            </svg>
-          </button>
+          <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+            <button
+              type="button"
+              onClick={login}
+              disabled={!ready}
+              className="inline-flex items-center gap-2 rounded-xl bg-white px-8 py-4 text-[14px] font-medium text-primary shadow-lg transition-colors hover:bg-blue-50 disabled:opacity-50"
+            >
+              Zacznij bezpłatnie
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+              </svg>
+            </button>
+            <a
+              href="/broszura-silesaid.pdf"
+              download
+              className="inline-flex items-center gap-2 rounded-xl border border-white/30 px-8 py-4 text-[14px] font-medium text-white transition-colors hover:bg-white/10"
+            >
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+              </svg>
+              Pobierz broszurę PDF
+            </a>
+          </div>
         </div>
       </section>
 
       <footer className="border-t border-gray-100 py-6">
         <div className="mx-auto flex max-w-5xl flex-col items-center gap-2 px-4 sm:flex-row sm:justify-between">
-          <span className="flex items-center gap-2">
-            <LogoMark size={20} />
-            <span className="text-[12px] font-semibold tracking-tight">
-              <span className="text-gray-700">Silesia</span>
-              <span className="text-primary">ID</span>
-            </span>
+          <span className="flex items-center">
+            <LogoMark size={36} />
           </span>
-          <span className="text-[11px] text-gray-400">ETHSilesia 2026 · Katowice</span>
+          <div className="flex items-center gap-4">
+            <a
+              href="/broszura-silesaid.pdf"
+              download
+              className="text-[11px] text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              Broszura PDF
+            </a>
+            <span className="text-[11px] text-gray-400">ETHSilesia 2026 · Katowice</span>
+          </div>
         </div>
       </footer>
     </div>

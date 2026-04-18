@@ -27,11 +27,25 @@ const STATUS_CONFIG: Record<string, { label: string; bg: string; text: string; d
   suspended: { label: "Zawieszona", bg: "#FAEEDA", text: "#633806", dot: "#854F0B" },
   deleted:   { label: "Wykreślona", bg: "#FCEBEB", text: "#791F1F", dot: "#A32D2D" },
   unknown:   { label: "Nieznany",   bg: "#F1EFE8", text: "#888780", dot: "#888780" },
+  /** Brak tx_hash — rejestr jeszcze nie ma pełnego potwierdzenia łańcuchowego */
+  pending_chain: {
+    label: "Trwa oczekiwanie na odłożenie cyfrowego śladu",
+    bg: "#FFF8E6",
+    text: "#854F0B",
+    dot: "#E5A000",
+  },
 };
+
+function dashboardStatusKey(cert: CertData): keyof typeof STATUS_CONFIG {
+  if (cert.company.status === "suspended") return "suspended";
+  if (cert.company.status === "deleted") return "deleted";
+  if (!cert.txHash) return "pending_chain";
+  return cert.company.status === "unknown" ? "unknown" : "active";
+}
 
 const TRUST_CONFIG: Record<number, { label: string; bg: string; text: string }> = {
   1: { label: "CEIDG — podstawowy", bg: "#FAEEDA", text: "#633806" },
-  2: { label: "KRS — pełny",        bg: "#E6F1FB", text: "#0C447C" },
+  2: { label: "KRS — pełny",        bg: "#E3E9F2", text: "#1A2A47" },
   3: { label: "Bank — zweryfikowany", bg: "#EEEDFE", text: "#3C3489" },
 };
 
@@ -61,11 +75,7 @@ export default function DashboardPage() {
       const data = await getMyCert(embeddedWallet.address);
       setCert(data);
     } catch (e: unknown) {
-      if (e instanceof Error && e.message.includes("404")) {
-        setCert(null);
-      } else {
-        setError(e instanceof Error ? e.message : "Błąd ładowania");
-      }
+      setError(e instanceof Error ? e.message : "Błąd ładowania");
     } finally {
       setLoading(false);
     }
@@ -77,6 +87,14 @@ export default function DashboardPage() {
       void import("qrcode.react").then((m) => setQRCode(() => m.QRCodeSVG));
     }
   }, [ready, authenticated, embeddedWallet, fetchCert]);
+
+  /** Automatyczne odświeżanie, dopóki backend nie dopisze tx_hash (mint / backfill). */
+  useEffect(() => {
+    if (!cert || cert.txHash) return;
+    if (cert.company.status === "suspended" || cert.company.status === "deleted") return;
+    const id = window.setInterval(() => void fetchCert(), 5000);
+    return () => window.clearInterval(id);
+  }, [cert, fetchCert]);
 
   async function handleRevoke() {
     if (!cert || !embeddedWallet?.address) return;
@@ -119,7 +137,7 @@ export default function DashboardPage() {
     );
   }
 
-  const statusCfg = cert ? (STATUS_CONFIG[cert.company.status] ?? STATUS_CONFIG.unknown) : null;
+  const statusCfg = cert ? (STATUS_CONFIG[dashboardStatusKey(cert)] ?? STATUS_CONFIG.unknown) : null;
   const trustCfg = cert ? (TRUST_CONFIG[cert.company.trustLevel] ?? TRUST_CONFIG[1]) : null;
 
   return (
@@ -274,21 +292,39 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              {cert.txHash && (
-                <div className="border-t border-gray-100 px-5 py-3.5">
-                  <p className="mb-1 text-[11px] font-medium text-gray-400">
-                    Potwierdzenie on-chain · Ethereum Sepolia
+              <div className="border-t border-gray-100 px-5 py-3.5">
+                <p className="mb-1 text-[12px] font-medium text-gray-800">
+                  Potwierdzenie techniczne certyfikatu
+                </p>
+                <p className="mb-2 text-[11px] leading-relaxed text-gray-500">
+                  Identyfikator zapisu w rejestrze infrastruktury zaufania — służy do audytu i porównania z
+                  publicznym potwierdzeniem wydania.
+                </p>
+                {cert.txHash ? (
+                  <div className="space-y-2">
+                    <p className="text-[11px] text-gray-600">
+                      Pełna wartość referencyjna (możesz zaznaczyć i skopiować):
+                    </p>
+                    <p className="select-all rounded-lg border border-gray-100 bg-white px-3 py-2 font-mono text-[11px] leading-relaxed text-gray-900 break-all">
+                      {cert.txHash}
+                    </p>
+                    <a
+                      href={`https://sepolia.etherscan.io/tx/${cert.txHash}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block text-[12px] font-medium text-primary hover:underline"
+                    >
+                      Zobacz zapis w rejestrze publicznym potwierdzeń →
+                    </a>
+                  </div>
+                ) : (
+                  <p className="text-[11px] leading-relaxed text-amber-800">
+                    Trwa oczekiwanie na odłożenie cyfrowego śladu — identyfikator zapisu pojawi się tu automatycznie po
+                    zapisie. Poinformujemy Cię mailowo, gdy potwierdzenie będzie gotowe. W razie błędu zapisu
+                    wyślemy informację na ten sam adres — to nasza obsługa błędów zapisu technicznego.
                   </p>
-                  <a
-                    href={`https://sepolia.etherscan.io/tx/${cert.txHash}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-mono text-[11px] text-primary break-all hover:underline"
-                  >
-                    {cert.txHash}
-                  </a>
-                </div>
-              )}
+                )}
+              </div>
             </div>
 
             {/* Verification history */}

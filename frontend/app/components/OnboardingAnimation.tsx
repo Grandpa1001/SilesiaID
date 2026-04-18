@@ -1,11 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import dynamic from "next/dynamic";
 import dokumentyData from "../../public/dokumenty.json";
 import pracaData from "../../public/praca.json";
 
 const Lottie = dynamic(() => import("lottie-react"), { ssr: false });
+
+/** Pauza przed kolejną iteracją (gdy autoLoop). */
+const LOOP_GAP_MS = 2800;
 
 const OLD_STEPS = [
   "Zapytanie o NIP / KRS",
@@ -22,18 +25,28 @@ const NEW_STEPS = [
   "Certyfikat gotowy — kod QR",
 ];
 
-export default function OnboardingAnimation() {
+type OnboardingAnimationProps = {
+  /** Start od razu i powtarzaj cykl po zakończeniu (np. landing). */
+  autoLoop?: boolean;
+};
+
+export default function OnboardingAnimation({ autoLoop = false }: OnboardingAnimationProps) {
   const [oldVisible, setOldVisible] = useState(0);
   const [newVisible, setNewVisible] = useState(0);
   const [done, setDone] = useState(false);
   const [running, setRunning] = useState(false);
 
-  function start() {
+  const start = useCallback(() => {
     setOldVisible(0);
     setNewVisible(0);
     setDone(false);
     setRunning(true);
-  }
+  }, []);
+
+  useEffect(() => {
+    if (!autoLoop) return;
+    start();
+  }, [autoLoop, start]);
 
   useEffect(() => {
     if (!running) return;
@@ -55,6 +68,12 @@ export default function OnboardingAnimation() {
 
     return () => timers.forEach(clearTimeout);
   }, [running]);
+
+  useEffect(() => {
+    if (!autoLoop || !done || running) return;
+    const t = setTimeout(() => start(), LOOP_GAP_MS);
+    return () => clearTimeout(t);
+  }, [done, running, autoLoop, start]);
 
   return (
     <div className="space-y-4">
@@ -138,16 +157,18 @@ export default function OnboardingAnimation() {
         </div>
       </div>
 
-      <div className="text-center">
-        <button
-          type="button"
-          onClick={start}
-          disabled={running}
-          className="rounded-lg border border-gray-200 bg-white px-5 py-2 text-[13px] text-gray-600 transition-colors hover:bg-surface disabled:opacity-40"
-        >
-          {running ? "Animacja trwa..." : "Uruchom animację ▶"}
-        </button>
-      </div>
+      {!autoLoop && (
+        <div className="text-center">
+          <button
+            type="button"
+            onClick={start}
+            disabled={running}
+            className="rounded-lg border border-gray-200 bg-white px-5 py-2 text-[13px] text-gray-600 transition-colors hover:bg-surface disabled:opacity-40"
+          >
+            {running ? "Animacja trwa..." : "Uruchom animację ▶"}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { db } from "../db/schema";
 import { fetchBusinessData } from "../services/registries";
+import { backfillTxHashIfMissing } from "../services/certTxSync";
 
 const router = Router();
 
@@ -27,6 +28,8 @@ router.get("/verify/:certId", async (req, res) => {
 
     const business = await fetchBusinessData(cert.nip);
 
+    const txHash = await backfillTxHashIfMissing(certId, cert.tx_hash);
+
     db.prepare("INSERT INTO verify_events (cert_id, verifier) VALUES (?, ?)").run(
       certId,
       (req.headers["x-verifier"] as string | undefined) || null
@@ -43,7 +46,7 @@ router.get("/verify/:certId", async (req, res) => {
         vatActive: business?.vatActive ?? true,
         address: business?.address,
       },
-      txHash: cert.tx_hash,
+      txHash,
       issuedAt: cert.created_at,
       verifiedAt: new Date().toISOString(),
       revoked: cert.revoked === 1,

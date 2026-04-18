@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { usePrivy, useWallets } from "@privy-io/react-auth";
-import { verifyNip, issueCert } from "@/lib/api";
+import { verifyNip, issueCert, pollCertificateTxHash } from "@/lib/api";
 import Header from "../components/Header";
 import SuccessScreen from "./SuccessScreen";
 
@@ -33,7 +34,7 @@ const STATUS_LABELS: Record<string, string> = {
 
 const TRUST_CONFIG: Record<number, { label: string; bg: string; text: string }> = {
   1: { label: "CEIDG — podstawowy", bg: "#FAEEDA", text: "#633806" },
-  2: { label: "KRS — pełny",        bg: "#E6F1FB", text: "#0C447C" },
+  2: { label: "KRS — pełny",        bg: "#E3E9F2", text: "#1A2A47" },
   3: { label: "Bank — zweryfikowany", bg: "#EEEDFE", text: "#3C3489" },
 };
 
@@ -50,6 +51,12 @@ const STEPS: { key: Step; label: string }[] = [
   { key: "success", label: "Gotowe" },
 ];
 
+const CERT_GENERATING_HINTS = [
+  "Możesz go wykorzystać do sprawy w banku.",
+  "Przyda się w urzędzie i w kontakcie z administracją.",
+  "Potwierdzisz nim firmę u partnerów i w relacjach B2B.",
+];
+
 function Spinner() {
   return (
     <svg
@@ -64,6 +71,7 @@ function Spinner() {
 }
 
 export default function OnboardingPage() {
+  const router = useRouter();
   const { authenticated, login } = usePrivy();
   const { wallets } = useWallets();
 
@@ -74,10 +82,30 @@ export default function OnboardingPage() {
   const [business, setBusiness] = useState<BusinessData | null>(null);
   const [certId, setCertId] = useState("");
   const [qrUrl, setQrUrl] = useState("");
+  const [issueFromCache, setIssueFromCache] = useState<{ alreadyExists: boolean; txHash: string | null } | null>(null);
+  const [confirmingOnChain, setConfirmingOnChain] = useState(false);
+  /** Po nieudanym mincie pokazujemy wskazówki: backend vs Network (nie „logi frontendu”). */
+  const [showMintFailureLogHint, setShowMintFailureLogHint] = useState(false);
+  const [chainConflict, setChainConflict] = useState(false);
+  const [certHintIndex, setCertHintIndex] = useState(0);
+
+  const showCertGeneratingModal =
+    step === "confirm" && Boolean(business) && (loading || confirmingOnChain);
+
+  useEffect(() => {
+    if (!showCertGeneratingModal) {
+      setCertHintIndex(0);
+      return;
+    }
+    const id = window.setInterval(() => {
+      setCertHintIndex((i) => (i + 1) % CERT_GENERATING_HINTS.length);
+    }, 2800);
+    return () => window.clearInterval(id);
+  }, [showCertGeneratingModal]);
 
   async function handleVerifyNip() {
     if (!/^\d{10}$/.test(nip)) { setError("NIP musi mieć dokładnie 10 cyfr"); return; }
-    setLoading(true); setError("");
+    setLoading(true); setError(""); setShowMintFailureLogHint(false);
     try {
       const res = await verifyNip(nip);
       setBusiness(res.data as BusinessData);
@@ -88,15 +116,134 @@ export default function OnboardingPage() {
   }
 
   async function handleIssueCert() {
-    setLoading(true); setError("");
+    setLoading(true);
+    setError("");
+    setShowMintFailureLogHint(false);
+    setChainConflict(false);
+    setConfirmingOnChain(false);
     try {
       const embeddedWallet = wallets.find((w) => w.walletClientType === "privy");
-      const res = await issueCert(nip, embeddedWallet?.address);
-      setCertId(res.certId); setQrUrl(res.qrUrl);
+      if (!embeddedWallet?.address) {
+        console.warn("[SilesiaID] issue-cert: przerwane — brak adresu portfela Privy (embedded). Poczekaj na załadowanie portfela.");
+        setError("Portfel nie jest jeszcze gotowy — poczekaj chwilę i spróbuj ponownie.");
+        setLoading(false);
+        return;
+      }
+      const w = embeddedWallet.address;
+      console.log("[SilesiaID] issue-cert: wysyłam POST /issue-cert", {
+        backend: process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001",
+        nip,
+        wallet: `${w.slice(0, 8)}…${w.slice(-6)}`,
+      });
+
+      const res = await issueCert(nip, embeddedWallet.address);
+
+      /** Brak pola w JSON (stary backend) nie znaczy „mint nie był” — dla nowego certu domyślnie tak. */
+      const alreadyExists = Boolean(res.alreadyExists);
+      const mintAttempted = res.mintAttempted ?? !alreadyExists;
+      const mintFailed =
+        res.mintFailed === true || (Boolean(res.mintError) && !res.txHash);
+
+      console.log("[SilesiaID] issue-cert: odpowiedź API", {
+        certId: res.certId,
+        issueRouteVersion: res.issueRouteVersion ?? "(brak — zrestartuj backend w katalogu backend/)",
+        alreadyExists,
+        mintAttempted,
+        mintFailed,
+        hasTxHash: Boolean(res.txHash),
+        mintError: res.mintError ?? null,
+        hint:
+          mintAttempted === false
+            ? "W tym POST backend nie wywołał mintCertificate (np. cert już w bazie i nie było retry)."
+            : "Mint był wykonywany na serwerze w trakcie tego POST (patrz logi backendu [mint]).",
+      });
+
+      if (res.issueRouteVersion !== 2 && !res.txHash) {
+        console.warn(
+          "[SilesiaID] Brak issueRouteVersion=2 w JSON z POST /issue-cert — inny proces na :3001 albo stary kod. " +
+            "Sprawdź: curl -s http://localhost:3001/health | jq .issueRouteVersion (musi być 2). " +
+            "Zabij wszystkie node na 3001 i uruchom tylko: cd backend && npm run dev"
+        );
+      }
+
+      if (mintFailed) {
+        let msg =
+          res.mintError ??
+          "Mint na Sepolii nie powiódł się. Certyfikat mógł zostać zapisany lokalnie — możesz spróbować ponownie (druga próba wyśle mint od nowa, jeśli backend na to pozwala).";
+        if (res.chainConflict && res.existingCertIdFromChain) {
+          setChainConflict(true);
+          msg =
+            "Ten portfel ma już certyfikat na Sepolii (jeden token na adres). " +
+            `ID na łańcuchu: ${res.existingCertIdFromChain}. ` +
+            (res.onChainMintTxHash
+              ? `Tx mint (do bazy / weryfikacji): ${res.onChainMintTxHash}. `
+              : "") +
+            "Otwórz „Mój certyfikat” albo w Sepolia wycofaj token i wystaw certyfikat ponownie.";
+        }
+        setError(msg);
+        setShowMintFailureLogHint(true);
+        console.warn("[onboarding] mintFailed — szczegóły techniczne poniżej; pełny stack tylko w logach backendu", {
+          mintError: res.mintError,
+          certId: res.certId,
+          chainConflict: res.chainConflict,
+          existingCertIdFromChain: res.existingCertIdFromChain,
+          onChainMintTxHash: res.onChainMintTxHash,
+        });
+        return;
+      }
+
+      let tx = res.txHash ?? null;
+
+      const alreadyExistsNoMint = alreadyExists && mintAttempted !== true && !tx;
+
+      if (!tx && alreadyExistsNoMint) {
+        console.log(
+          "[SilesiaID] pomijam modal „szukam hashu” — cert już był w bazie i w tym POST nie było minca; nie ma sensu udawać oczekiwania na tx",
+          { certId: res.certId }
+        );
+      } else if (!tx) {
+        console.log(
+          "[SilesiaID] drugi etap: odpytywanie GET /verify (to nie jest mint; mint był w poprzednim POST tylko gdy mintAttempted=true)",
+          { certId: res.certId, mintAttempted }
+        );
+        setConfirmingOnChain(true);
+        try {
+          const maxMs = mintAttempted ? 50000 : 15000;
+          tx = await pollCertificateTxHash(res.certId, { maxMs, intervalMs: 2500 });
+        } finally {
+          setConfirmingOnChain(false);
+        }
+      }
+
+      setCertId(res.certId);
+      setQrUrl(res.qrUrl);
+      setIssueFromCache({
+        alreadyExists,
+        txHash: tx,
+      });
+      if (alreadyExists) {
+        if (mintAttempted) {
+          console.warn("[SilesiaID] alreadyExists + w tym POST był ponowny mint (ścieżka brak tx_hash)", res);
+        } else {
+          console.warn(
+            "[SilesiaID] alreadyExists — w tym POST nie było wywołania mint (rekord NIP już w bazie; tx już jest albo nie spełniono warunków retry)",
+            res
+          );
+        }
+      } else {
+        console.log("[SilesiaID] nowy certyfikat: INSERT + mint w POST (mintAttempted zwykle true)", {
+          certId: res.certId,
+          mintAttempted,
+          txHash: tx,
+        });
+      }
       setStep("success");
     } catch (e: unknown) {
+      console.error("[SilesiaID] issue-cert: błąd sieci lub API (fetch nie doszedł / 4xx/5xx)", e);
       setError(e instanceof Error ? e.message : "Błąd wydania certyfikatu");
-    } finally { setLoading(false); }
+    } finally {
+      setLoading(false);
+    }
   }
 
   const currentStepIndex = STEPS.findIndex((s) => s.key === step);
@@ -148,13 +295,13 @@ export default function OnboardingPage() {
                   {i > 0 && (
                     <div
                       className="h-px flex-1 transition-colors duration-300"
-                      style={{ backgroundColor: currentStepIndex > i - 1 ? "#185FA5" : "#D1D5DB" }}
+                      style={{ backgroundColor: currentStepIndex > i - 1 ? "#273E65" : "#D1D5DB" }}
                     />
                   )}
                   <div
                     className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[12px] font-medium transition-all duration-300"
                     style={{
-                      backgroundColor: isCompleted || isCurrent ? "#185FA5" : "#E5E7EB",
+                      backgroundColor: isCompleted || isCurrent ? "#273E65" : "#E5E7EB",
                       color: isCompleted || isCurrent ? "white" : "#9CA3AF",
                     }}
                   >
@@ -169,13 +316,13 @@ export default function OnboardingPage() {
                   {i < STEPS.length - 1 && (
                     <div
                       className="h-px flex-1 transition-colors duration-300"
-                      style={{ backgroundColor: currentStepIndex > i ? "#185FA5" : "#D1D5DB" }}
+                      style={{ backgroundColor: currentStepIndex > i ? "#273E65" : "#D1D5DB" }}
                     />
                   )}
                 </div>
                 <span
                   className="text-[11px] font-medium transition-colors"
-                  style={{ color: isCurrent ? "#111827" : isCompleted ? "#185FA5" : "#9CA3AF" }}
+                  style={{ color: isCurrent ? "#111827" : isCompleted ? "#273E65" : "#9CA3AF" }}
                 >
                   {s.label}
                 </span>
@@ -202,6 +349,7 @@ export default function OnboardingPage() {
               onChange={(e) => {
                 setNip(e.target.value.replace(/\D/g, ""));
                 setError("");
+                setShowMintFailureLogHint(false);
               }}
               onKeyDown={(e) => { if (e.key === "Enter" && nip.length === 10) void handleVerifyNip(); }}
               placeholder="np. 6310000000"
@@ -241,6 +389,31 @@ export default function OnboardingPage() {
               </svg>
               <p className="text-[11px] leading-relaxed text-gray-500">
                 Dane pobierane bezpośrednio z CEIDG, KRS i Białej listy MF. NIP nie jest przechowywany bez Twojej zgody.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {showCertGeneratingModal && (
+          <div
+            className="fixed inset-0 z-40 flex items-center justify-center bg-black/40 px-4"
+            role="alertdialog"
+            aria-busy="true"
+            aria-live="polite"
+            aria-label="Trwa tworzenie certyfikatu"
+          >
+            <div className="max-w-sm rounded-2xl border border-gray-100 bg-white p-8 text-center shadow-xl">
+              <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#E8F7F1]">
+                <Spinner />
+              </div>
+              <p className="text-[16px] font-medium leading-snug text-gray-900">
+                Trwa tworzenie cyfrowego certyfikatu dla Twojej firmy
+              </p>
+              <p
+                key={certHintIndex}
+                className="mt-4 min-h-13 text-[14px] leading-relaxed text-gray-600 motion-safe:animate-fade-in"
+              >
+                {CERT_GENERATING_HINTS[certHintIndex]}
               </p>
             </div>
           </div>
@@ -313,22 +486,63 @@ export default function OnboardingPage() {
             <div className="px-6 pb-6">
               {error && (
                 <div className="mb-4 rounded-xl bg-danger-light px-4 py-3 text-[12px] text-danger">
-                  {error}
+                  {showMintFailureLogHint && (
+                    <p className="mb-2 text-[13px] font-semibold text-gray-900">
+                      {chainConflict ? "Portfel ma już certyfikat na łańcuchu" : "Mint na Sepolii się nie udał"}
+                    </p>
+                  )}
+                  <p className="whitespace-pre-wrap leading-relaxed">{error}</p>
+                  {chainConflict && (
+                    <button
+                      type="button"
+                      onClick={() => router.push("/dashboard")}
+                      className="mt-3 w-full rounded-xl bg-[#1A1A1A] py-2.5 text-[13px] font-medium text-white transition-colors hover:bg-gray-800"
+                    >
+                      Przejdź do „Mój certyfikat”
+                    </button>
+                  )}
+                  {showMintFailureLogHint && !chainConflict && (
+                    <div className="mt-4 border-t border-red-200/80 pt-3 text-[11px] leading-relaxed text-gray-800">
+                      <p className="font-medium text-gray-900">Gdzie szukać przyczyny?</p>
+                      <ul className="mt-2 list-disc space-y-1.5 pl-4">
+                        <li>
+                          <strong>Backend (terminal)</strong> — proces z{" "}
+                          <code className="rounded bg-white/70 px-1 py-0.5 font-mono text-[10px]">npm run dev</code> w
+                          katalogu <code className="rounded bg-white/70 px-1 py-0.5 font-mono text-[10px]">backend</code>
+                          . Szukaj linii{" "}
+                          <code className="break-all rounded bg-white/70 px-1 py-0.5 font-mono text-[10px]">
+                            [issue-cert] mint nieudany
+                          </code>{" "}
+                          lub{" "}
+                          <code className="rounded bg-white/70 px-1 py-0.5 font-mono text-[10px]">[mint]</code> — tam jest
+                          pełny komunikat z sieci Ethereum / kontraktu (viem).
+                        </li>
+                        <li>
+                          <strong>Przeglądarka</strong> —{" "}
+                          <span className="font-medium">DevTools → Network</span> → żądanie{" "}
+                          <code className="rounded bg-white/70 px-1 py-0.5 font-mono text-[10px]">issue-cert</code> →
+                          odpowiedź JSON: pole{" "}
+                          <code className="rounded bg-white/70 px-1 py-0.5 font-mono text-[10px]">mintError</code>.
+                        </li>
+                      </ul>
+                      <p className="mt-3 text-gray-600">
+                        Konsola przeglądarki (F12 → Console) <strong>nie</strong> pokazuje szczegółów RPC ani revertów z
+                        Sepolii — tylko to, co widzisz tutaj oraz w Network.
+                      </p>
+                    </div>
+                  )}
                 </div>
               )}
 
               <button
                 type="button"
                 onClick={() => void handleIssueCert()}
-                disabled={loading}
+                disabled={loading || confirmingOnChain}
                 className="mb-2.5 flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-[14px] font-medium text-white transition-opacity disabled:opacity-40"
                 style={{ backgroundColor: "#1D9E75" }}
               >
                 {loading ? (
-                  <>
-                    <Spinner />
-                    Generujemy certyfikat…
-                  </>
+                  "Trwa generowanie"
                 ) : (
                   <>
                     Tak, to moja firma — generuj certyfikat
@@ -349,7 +563,13 @@ export default function OnboardingPage() {
           </div>
         )}
 
-        {step === "success" && <SuccessScreen certId={certId} qrUrl={qrUrl} />}
+        {step === "success" && (
+          <SuccessScreen
+            certId={certId}
+            qrUrl={qrUrl}
+            alreadyExists={issueFromCache?.alreadyExists}
+          />
+        )}
       </main>
     </div>
   );

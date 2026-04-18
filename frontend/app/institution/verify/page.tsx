@@ -10,6 +10,7 @@ import {
   institutionLookup,
   type InstitutionLookupResult,
 } from "@/lib/institutionApi";
+import InstitutionHeader from "@/app/components/InstitutionHeader";
 
 const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001";
 
@@ -510,57 +511,12 @@ export default function InstitutionVerifyPage() {
 
   return (
     <div className="min-h-screen bg-surface">
-      <header className="border-b border-gray-100 bg-white px-4 py-4 shadow-sm">
-        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3">
-          <div>
-            <p className="text-xs font-medium uppercase tracking-widest text-primary-dark">Panel instytucji</p>
-            <h1 className="text-lg font-semibold text-gray-900">{institutionName}</h1>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <Link
-              href="/"
-              className="rounded-xl border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-            >
-              Strona główna
-            </Link>
-            <button
-              type="button"
-              onClick={logout}
-              className="rounded-xl border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-            >
-              Wyloguj
-            </button>
-          </div>
-        </div>
-
-        {/* Tab nav */}
-        <div className="mx-auto mt-3 max-w-5xl">
-          <nav className="flex gap-1 border-b border-gray-100">
-            <button
-              type="button"
-              onClick={() => setActiveTab("verify")}
-              className={`-mb-px rounded-t-lg px-4 py-2 text-sm font-medium transition-colors ${
-                activeTab === "verify"
-                  ? "border-b-2 border-primary-dark text-primary-dark"
-                  : "text-gray-500 hover:text-gray-800"
-              }`}
-            >
-              Weryfikacja
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab("docs")}
-              className={`-mb-px rounded-t-lg px-4 py-2 text-sm font-medium transition-colors ${
-                activeTab === "docs"
-                  ? "border-b-2 border-primary-dark text-primary-dark"
-                  : "text-gray-500 hover:text-gray-800"
-              }`}
-            >
-              Dokumentacja techniczna
-            </button>
-          </nav>
-        </div>
-      </header>
+      <InstitutionHeader
+        institutionName={institutionName}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        onLogout={logout}
+      />
 
       <main className="mx-auto max-w-5xl px-4 py-8">
         {activeTab === "verify" && (

@@ -31,13 +31,17 @@ describe("SilesiaID", function () {
     ).to.be.revertedWith("SilesiaID: token is soulbound");
   });
 
-  it("revoke dezaktywuje certyfikat", async function () {
+  it("revoke usuwa token i zwalnia portfel (ponowny mint możliwy)", async function () {
     const { contract, user } = await deploy();
     const nipHash = ethers.keccak256(ethers.toUtf8Bytes("6310000000"));
     await contract.mint(user.address, nipHash, ethers.ZeroHash, 1, "TEST03");
 
     await contract.revoke("TEST03");
-    const identity = await contract.getIdentityByCertId("TEST03");
-    expect(identity.isActive).to.be.false;
+
+    await expect(contract.getIdentityByCertId("TEST03")).to.be.reverted;
+
+    await contract.mint(user.address, nipHash, ethers.ZeroHash, 2, "TEST05");
+    const identity = await contract.getIdentityByCertId("TEST05");
+    expect(identity.trustLevel).to.equal(2);
   });
 });

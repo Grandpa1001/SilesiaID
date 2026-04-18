@@ -3,7 +3,15 @@
 import { useState, useEffect, type ComponentType } from "react";
 import { useRouter } from "next/navigation";
 
-export default function SuccessScreen({ certId, qrUrl }: { certId: string; qrUrl: string }) {
+export default function SuccessScreen({
+  certId,
+  qrUrl,
+  alreadyExists,
+}: {
+  certId: string;
+  qrUrl: string;
+  alreadyExists?: boolean;
+}) {
   const router = useRouter();
   const [QRCode, setQRCode] = useState<ComponentType<{ value: string; size: number }> | null>(null);
 
@@ -13,7 +21,6 @@ export default function SuccessScreen({ certId, qrUrl }: { certId: string; qrUrl
 
   return (
     <div className="rounded-2xl border border-gray-100 bg-white shadow-sm overflow-hidden animate-slide-up">
-      {/* Success header */}
       <div className="px-6 py-8 text-center" style={{ backgroundColor: "#E1F5EE" }}>
         <div
           className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl text-white shadow-lg"
@@ -32,13 +39,23 @@ export default function SuccessScreen({ certId, qrUrl }: { certId: string; qrUrl
       </div>
 
       <div className="p-6">
-        {/* Cert ID */}
+        {alreadyExists && (
+          <div
+            className="mb-5 rounded-xl border px-4 py-3 text-[13px] leading-relaxed"
+            style={{ borderColor: "#F59E0B", backgroundColor: "#FFFBEB", color: "#92400E" }}
+          >
+            <p className="font-medium">Certyfikat dla tego NIP był już w bazie</p>
+            <p className="mt-1 text-[12px] opacity-90">
+              Nie tworzyliśmy drugiego rekordu — szczegóły znajdziesz w panelu certyfikatu.
+            </p>
+          </div>
+        )}
+
         <div className="mb-5 rounded-xl bg-surface px-4 py-3">
           <div className="mb-0.5 text-[11px] font-medium text-gray-400">Certyfikat ID</div>
           <div className="font-mono text-[13px] font-medium text-gray-800 break-all">{certId}</div>
         </div>
 
-        {/* QR code */}
         <div className="mb-5 flex flex-col items-center gap-3">
           <div className="rounded-2xl border border-gray-100 p-4 bg-white shadow-sm">
             {QRCode ? (
@@ -54,13 +71,11 @@ export default function SuccessScreen({ certId, qrUrl }: { certId: string; qrUrl
           </p>
         </div>
 
-        {/* URL */}
         <div className="mb-5 rounded-xl bg-surface px-4 py-3">
           <div className="mb-0.5 text-[11px] font-medium text-gray-400">Link do weryfikacji</div>
           <div className="font-mono text-[11px] text-gray-500 break-all">{qrUrl}</div>
         </div>
 
-        {/* Actions */}
         <div className="flex flex-col gap-2.5">
           <button
             type="button"

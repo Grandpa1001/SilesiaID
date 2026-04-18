@@ -1,4 +1,5 @@
 {
+  "exclude": ["node_modules", "scripts"],
   "compilerOptions": {
     "target": "ES2022",
     "module": "CommonJS",
