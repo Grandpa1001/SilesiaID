@@ -4,14 +4,5 @@
   "packages": {
     "node": "22"
   },
-  "buildAptPackages": ["python3", "make", "g++"],
-  "steps": {
-    "install": {
-      "commands": ["npm ci"]
-    },
-    "build": {
-      "inputs": [{ "step": "install" }],
-      "commands": ["npm run build"]
-    }
-  }
+  "buildAptPackages": ["python3", "make", "g++"]
 }
