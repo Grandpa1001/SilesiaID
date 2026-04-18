@@ -2,10 +2,11 @@
   "$schema": "https://railway.com/railway.schema.json",
   "build": {
     "builder": "RAILPACK",
+    "buildCommand": "cd backend && npm ci && npm run build",
     "watchPatterns": ["backend/**", "railway.json"]
   },
   "deploy": {
-    "startCommand": "node dist/index.js",
+    "startCommand": "node backend/dist/index.js",
     "healthcheckPath": "/health"
   }
 }
