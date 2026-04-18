@@ -4,6 +4,8 @@ import dotenv from "dotenv";
 import nipRouter from "./routes/nip";
 import issueRouter from "./routes/issue";
 import verifyRouter from "./routes/verify";
+import myCertRouter from "./routes/myCert";
+import revokeRouter from "./routes/revoke";
 import { initDB } from "./db/schema";
 
 dotenv.config();
@@ -19,6 +21,8 @@ app.get("/health", (_req, res) => {
 app.use("/api/v1", nipRouter);
 app.use("/api/v1", issueRouter);
 app.use("/api/v1", verifyRouter);
+app.use("/api/v1", myCertRouter);
+app.use("/api/v1", revokeRouter);
 
 initDB();
 

@@ -45,10 +45,10 @@ router.post("/issue-cert", async (req, res) => {
 
     db.prepare(
       `
-      INSERT INTO certs (cert_id, nip, tx_hash, trust_level, company_name, company_status)
-      VALUES (?, ?, ?, ?, ?, ?)
+      INSERT INTO certs (cert_id, nip, user_wallet, tx_hash, trust_level, company_name, company_status)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
     `
-    ).run(certId, nip, txHash, business.trustLevel, business.name, business.status);
+    ).run(certId, nip, userWallet ?? null, txHash, business.trustLevel, business.name, business.status);
 
     const frontendUrl = process.env.CORS_ORIGIN || "http://localhost:3000";
     res.json({

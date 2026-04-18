@@ -4,14 +4,20 @@ import { fetchBusinessData } from "../services/registries";
 
 const router = Router();
 
-router.get("/verify/:certId", async (req, res) => {
+router.get("/my-cert", async (req, res) => {
   try {
-    const { certId } = req.params;
+    const wallet = req.query.wallet as string | undefined;
+    if (!wallet) {
+      return res.status(400).json({ error: "Brak parametru wallet" });
+    }
 
-    const cert = db.prepare("SELECT * FROM certs WHERE cert_id = ?").get(certId) as
+    const cert = db
+      .prepare("SELECT * FROM certs WHERE user_wallet = ? AND revoked = 0 ORDER BY created_at DESC LIMIT 1")
+      .get(wallet) as
       | {
           cert_id: string;
           nip: string;
+          user_wallet: string | null;
           tx_hash: string | null;
           trust_level: number;
           company_name: string | null;
@@ -22,31 +28,31 @@ router.get("/verify/:certId", async (req, res) => {
       | undefined;
 
     if (!cert) {
-      return res.status(404).json({ error: "Certyfikat nie znaleziony" });
+      return res.status(404).json({ error: "Brak certyfikatu dla tego konta" });
     }
 
     const business = await fetchBusinessData(cert.nip);
 
-    db.prepare("INSERT INTO verify_events (cert_id, verifier) VALUES (?, ?)").run(
-      certId,
-      (req.headers["x-verifier"] as string | undefined) || null
-    );
+    const verifyEvents = db
+      .prepare("SELECT verifier, verified_at FROM verify_events WHERE cert_id = ? ORDER BY verified_at DESC LIMIT 20")
+      .all(cert.cert_id) as { verifier: string | null; verified_at: string }[];
+
+    const frontendUrl = process.env.CORS_ORIGIN || "http://localhost:3000";
 
     res.json({
-      certId,
+      certId: cert.cert_id,
       nip: cert.nip,
+      qrUrl: `${frontendUrl}/verify/${cert.cert_id}`,
+      txHash: cert.tx_hash,
+      issuedAt: cert.created_at,
       company: {
-        nip: cert.nip,
         name: business?.name ?? cert.company_name,
         status: business?.status ?? cert.company_status,
         trustLevel: business?.trustLevel ?? cert.trust_level,
         vatActive: business?.vatActive ?? true,
         address: business?.address,
       },
-      txHash: cert.tx_hash,
-      issuedAt: cert.created_at,
-      verifiedAt: new Date().toISOString(),
-      revoked: cert.revoked === 1,
+      verifyHistory: verifyEvents,
     });
   } catch (e: any) {
     console.error(e);

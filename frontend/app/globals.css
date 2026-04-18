@@ -1,26 +1,87 @@
 @import "tailwindcss";
 
+@theme inline {
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-dm-mono);
+
+  --color-primary: #185FA5;
+  --color-primary-dark: #0C447C;
+  --color-primary-light: #E6F1FB;
+  --color-teal: #1D9E75;
+  --color-teal-dark: #085041;
+  --color-teal-light: #E1F5EE;
+  --color-purple: #534AB7;
+  --color-purple-light: #EEEDFE;
+  --color-amber: #854F0B;
+  --color-amber-light: #FAEEDA;
+  --color-danger: #A32D2D;
+  --color-danger-light: #FCEBEB;
+  --color-muted: #888780;
+  --color-surface: #F4F2EB;
+  --color-surface-hover: #EAE8E1;
+}
+
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #1A1A1A;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
 }
+
+*:focus-visible {
+  outline: 2px solid #185FA5;
+  outline-offset: 2px;
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes progress-fill {
+  from { width: 0%; }
+  to   { width: 100%; }
+}
+
+@keyframes step-appear {
+  0%   { opacity: 0; transform: translateX(-8px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes check-pop {
+  0%   { opacity: 0; transform: scale(0.5); }
+  70%  { transform: scale(1.15); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+.animate-slide-up   { animation: slide-up 0.4s ease both; }
+.animate-fade-in    { animation: fade-in 0.3s ease both; }
+.animate-spin       { animation: spin 0.7s linear infinite; }
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.step-1 { animation: step-appear 0.35s ease both; animation-delay: 0.2s; }
+.step-2 { animation: step-appear 0.35s ease both; animation-delay: 0.9s; }
+.step-3 { animation: step-appear 0.35s ease both; animation-delay: 1.6s; }
+.step-4 { animation: step-appear 0.35s ease both; animation-delay: 2.3s; }
+.step-5 { animation: step-appear 0.35s ease both; animation-delay: 3.0s; }
+.step-6 { animation: step-appear 0.35s ease both; animation-delay: 3.7s; }
+
+.new-step-1 { animation: step-appear 0.35s ease both; animation-delay: 0.4s; }
+.new-step-2 { animation: step-appear 0.35s ease both; animation-delay: 1.2s; }
+.new-step-3 { animation: step-appear 0.35s ease both; animation-delay: 2.0s; }
+.new-check  { animation: check-pop  0.4s ease both;   animation-delay: 2.8s; }
