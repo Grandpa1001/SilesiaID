@@ -5,6 +5,7 @@
     "node": "22"
   },
   "buildAptPackages": ["python3", "make", "g++"],
+  "aptPackages": ["libstdc++6", "libgcc-s1"],
   "build": {
     "cmds": ["cd backend && npm ci && npm run build"]
   },
