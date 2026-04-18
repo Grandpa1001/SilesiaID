@@ -51,12 +51,13 @@ app.use("/api/v1/institution", institutionVerifyRouter);
 
 initDB();
 
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
+const PORT = Number(process.env.PORT) || 3001;
+/** Railway / Docker: musi nasłuchiwać na wszystkich interfejsach, nie tylko localhost. */
+app.listen(PORT, "0.0.0.0", () => {
   const has = (k: string) => Boolean(process.env[k]?.trim());
   console.log("");
   console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-  console.log(`  SilesiaID backend  ·  http://localhost:${PORT}`);
+  console.log(`  SilesiaID backend  ·  port ${PORT} (0.0.0.0)`);
   console.log(`  cwd (skąd uruchomiono npm)  ${process.cwd()}`);
   console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
   console.log(`  NODE_ENV          ${process.env.NODE_ENV ?? "(unset)"}`);
