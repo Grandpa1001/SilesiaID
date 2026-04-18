@@ -1,0 +1,20 @@
+{
+  "$schema": "https://schema.railpack.com",
+  "provider": "node",
+  "packages": {
+    "node": "22"
+  },
+  "buildAptPackages": ["python3", "make", "g++"],
+  "steps": {
+    "install": {
+      "commands": ["cd backend && npm ci"]
+    },
+    "build": {
+      "inputs": [{ "step": "install" }],
+      "commands": ["cd backend && npm run build"]
+    }
+  },
+  "deploy": {
+    "startCommand": "node backend/dist/index.js"
+  }
+}
