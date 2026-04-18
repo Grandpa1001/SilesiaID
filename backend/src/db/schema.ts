@@ -52,6 +52,15 @@ export function initDB() {
       verifier    TEXT,
       verified_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
+
+    CREATE TABLE IF NOT EXISTS institutions (
+      id             INTEGER PRIMARY KEY AUTOINCREMENT,
+      name           TEXT NOT NULL,
+      email          TEXT UNIQUE NOT NULL,
+      password_hash  TEXT NOT NULL,
+      api_key_hash   TEXT,
+      created_at     TEXT NOT NULL DEFAULT (datetime('now'))
+    );
   `);
   runMigrations();
   console.log("DB initialized");

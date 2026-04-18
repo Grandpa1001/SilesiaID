@@ -19,64 +19,71 @@ export default function Header() {
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-100">
       <div className="mx-auto flex max-w-5xl items-center gap-4 px-4 py-2.5">
         {/* Logo */}
-        <Link href="/" className="shrink-0 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#185FA5] focus-visible:ring-offset-2">
+        <Link
+          href="/"
+          className="shrink-0 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+        >
           <SilesiaIDLogo iconSize={28} />
         </Link>
 
-        {/* Nav — authenticated */}
-        {ready && authenticated && (
-          <nav className="flex items-center gap-1 ml-auto">
-            <Link
-              href="/dashboard"
-              className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
-                isDashboard
-                  ? "bg-[#E6F1FB] text-[#185FA5]"
-                  : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-              }`}
-            >
-              Mój certyfikat
-            </Link>
+        <div className="ml-auto flex flex-wrap items-center justify-end gap-2 sm:gap-3">
+          <Link
+            href="/institution/login"
+            className="rounded-lg px-3 py-1.5 text-sm text-gray-600 transition-colors hover:text-gray-900"
+          >
+            Dla instytucji
+          </Link>
 
-            {isLanding && (
-              <button
-                type="button"
-                onClick={() => router.push("/onboarding")}
-                className="rounded-lg bg-[#1A1A1A] px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-800 transition-colors"
+          {ready && authenticated && (
+            <nav className="flex flex-wrap items-center gap-1">
+              <Link
+                href="/dashboard"
+                className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
+                  isDashboard
+                    ? "bg-primary-light text-primary"
+                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                }`}
               >
-                Utwórz certyfikat
-              </button>
-            )}
+                Mój certyfikat
+              </Link>
 
-            {/* Divider + user section */}
-            <div className="ml-2 flex items-center gap-2 pl-3 border-l border-gray-100">
-              {userLabel && (
-                <span className="hidden sm:block text-xs text-gray-400 truncate max-w-[130px]" title={userLabel}>
-                  {userLabel}
-                </span>
+              {isLanding && (
+                <button
+                  type="button"
+                  onClick={() => router.push("/onboarding")}
+                  className="rounded-lg bg-gray-900 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-gray-800"
+                >
+                  Utwórz certyfikat
+                </button>
               )}
-              <button
-                type="button"
-                onClick={logout}
-                className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition-colors"
-              >
-                Wyloguj
-              </button>
-            </div>
-          </nav>
-        )}
 
-        {/* Nav — unauthenticated */}
-        {ready && !authenticated && (
-          <div className="ml-auto">
+              <div className="ml-1 flex items-center gap-2 border-l border-gray-100 pl-3">
+                {userLabel && (
+                  <span className="hidden max-w-[130px] truncate text-xs text-gray-400 sm:block" title={userLabel}>
+                    {userLabel}
+                  </span>
+                )}
+                <button
+                  type="button"
+                  onClick={logout}
+                  className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-900"
+                >
+                  Wyloguj
+                </button>
+              </div>
+            </nav>
+          )}
+
+          {ready && !authenticated && (
             <button
               type="button"
               onClick={login}
-              className="rounded-lg bg-[#185FA5] px-4 py-1.5 text-sm font-medium text-white hover:bg-[#0C447C] transition-colors disabled:opacity-50"
+              className="rounded-lg bg-primary px-4 py-1.5 text-sm font-medium text-white transition-colors hover:bg-primary-dark disabled:opacity-50"
             >
               Zaloguj się
             </button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </header>
   );

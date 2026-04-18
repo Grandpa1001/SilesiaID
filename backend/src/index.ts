@@ -6,6 +6,8 @@ import issueRouter from "./routes/issue";
 import verifyRouter from "./routes/verify";
 import myCertRouter from "./routes/myCert";
 import revokeRouter from "./routes/revoke";
+import institutionAuthRouter from "./routes/institutionAuth";
+import institutionVerifyRouter from "./routes/institutionVerify";
 import { initDB } from "./db/schema";
 
 dotenv.config();
@@ -23,6 +25,8 @@ app.use("/api/v1", issueRouter);
 app.use("/api/v1", verifyRouter);
 app.use("/api/v1", myCertRouter);
 app.use("/api/v1", revokeRouter);
+app.use("/api/v1/institution", institutionAuthRouter);
+app.use("/api/v1/institution", institutionVerifyRouter);
 
 initDB();
 

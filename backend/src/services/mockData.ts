@@ -48,7 +48,7 @@ export const MOCK_COMPANIES: Record<string, BusinessIdentity> = {
   // --- Spółki / KRS ---
   "5262562610": {
     nip: "5262562610",
-    name: "PKO Bank Polski S.A.",
+    name: "Przykładowy Bank S.A.",
     status: "active",
     type: "sa",
     registrySource: "krs",

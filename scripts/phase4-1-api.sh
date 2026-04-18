@@ -20,7 +20,7 @@ code=$(curl -s -o /tmp/n404.json -w "%{http_code}" -X POST "$BASE/verify-nip" -H
 test "$code" = "404" && echo "OK 0000000000 -> 404" || { echo "FAIL expected 404 got $code"; exit 1; }
 
 echo ""
-echo "=== issue-cert + verify (5262562610 / PKO mock) ==="
+echo "=== issue-cert + verify (5262562610 / mock spółka) ==="
 CERT=$(curl -s -X POST "$BASE/issue-cert" -H "Content-Type: application/json" -d '{"nip":"5262562610"}' | jq -r '.certId')
 curl -sf "$BASE/verify/$CERT" | jq -e '.company.status == "active"' >/dev/null
 echo "OK verify GET $CERT -> active"

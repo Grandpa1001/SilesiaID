@@ -2,6 +2,7 @@
 
 import { usePrivy } from "@privy-io/react-auth";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useEffect } from "react";
 import Header from "./components/Header";
 import OnboardingAnimation from "./components/OnboardingAnimation";
@@ -261,29 +262,138 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Trust badges */}
-      <section className="border-t border-gray-100 bg-surface/60 py-10">
-        <div className="mx-auto max-w-3xl px-4">
-          <p className="mb-5 text-center text-[11px] font-medium uppercase tracking-widest text-gray-400">
-            Weryfikowany przez publiczne rejestry RP
+      {/* Dla instytucji + API (A.6) */}
+      <section className="border-t border-gray-100 bg-white py-16">
+        <div className="mx-auto max-w-5xl px-4">
+          <h2 className="mb-2 text-center text-[22px] font-medium text-gray-900">
+            Dla systemów weryfikujących
+          </h2>
+          <p className="mx-auto mb-10 max-w-2xl text-center text-[14px] text-gray-500">
+            Banki, KNF, urzędy i partnerzy B2B mogą sprawdzać certyfikat po NIP lub ID z QR — bez
+            przechodzenia przez onboarding przedsiębiorcy.
           </p>
-          <div className="flex flex-wrap justify-center gap-2.5">
-            {[
-              { label: "CEIDG", bg: "#E6F1FB", text: "#185FA5" },
-              { label: "KRS", bg: "#E6F1FB", text: "#185FA5" },
-              { label: "Biała lista VAT MF", bg: "#E1F5EE", text: "#085041" },
-              { label: "Ethereum Sepolia", bg: "#EEEDFE", text: "#3C3489" },
-              { label: "EBSI kompatybilny", bg: "#F1EFE8", text: "#888780" },
-            ].map(({ label, bg, text }) => (
-              <span
-                key={label}
-                className="rounded-full px-4 py-1.5 text-[12px] font-medium"
-                style={{ backgroundColor: bg, color: text }}
+          <div className="grid gap-6 md:grid-cols-2">
+            <div className="flex flex-col rounded-2xl border border-gray-100 bg-surface/40 p-8 shadow-sm">
+              <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-primary-light text-primary">
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 0 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z"
+                  />
+                </svg>
+              </div>
+              <h3 className="mb-2 text-[17px] font-medium text-gray-900">Panel weryfikatora</h3>
+              <p className="mb-1 flex-1 text-[14px] leading-relaxed text-gray-600">
+                Zaloguj się jako instytucja.
+              </p>
+              <p className="mb-1 text-[14px] leading-relaxed text-gray-600">
+                Wpisz NIP lub zeskanuj QR.
+              </p>
+              <p className="mb-6 text-[14px] leading-relaxed text-gray-600">Dane certyfikatu w kilka sekund.</p>
+              <Link
+                href="/institution/login"
+                className="mt-auto inline-flex items-center gap-2 text-sm font-medium text-primary-dark hover:text-primary"
               >
-                {label}
-              </span>
+                Zaloguj jako instytucja
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                </svg>
+              </Link>
+            </div>
+            <div className="flex flex-col rounded-2xl border border-gray-100 bg-surface/40 p-8 shadow-sm">
+              <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-purple-light text-purple">
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M17.25 6.75 22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3-4.5 16.5"
+                  />
+                </svg>
+              </div>
+              <h3 className="mb-2 text-[17px] font-medium text-gray-900">Integracja API</h3>
+              <p className="mb-3 flex-1 text-[14px] leading-relaxed text-gray-600">
+                Zintegruj w kilkanaście minut. Jedno zapytanie — odpowiedź z danymi certyfikatu i firmy.
+              </p>
+              <code className="mb-2 block rounded-xl bg-white px-3 py-2 font-mono text-[11px] text-gray-700 ring-1 ring-gray-100">
+                {`GET /api/v1/institution/lookup?q={nip_lub_certId}`}
+              </code>
+              <p className="mb-6 text-[13px] text-gray-500">Bearer: JWT po logowaniu lub klucz API (np. sid_…).</p>
+              <Link
+                href="/institution/login"
+                className="mt-auto inline-flex items-center gap-2 text-sm font-medium text-primary-dark hover:text-primary"
+              >
+                Zacznij z API
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                </svg>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Skąd pochodzi pewność? (A.6) */}
+      <section className="border-t border-gray-100 bg-surface/60 py-14">
+        <div className="mx-auto max-w-4xl px-4">
+          <h2 className="mb-2 text-center text-[20px] font-medium text-gray-900">Skąd pochodzi pewność?</h2>
+          <p className="mb-10 text-center text-[14px] text-gray-500">
+            Certyfikat opiera się na jawnych źródłach państwowych i zapisie on-chain.
+          </p>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              {
+                title: "CEIDG",
+                desc: "Jednoosobowe działalności i wpisy bez KRS.",
+                icon: (
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008H18v-.008Zm0 3h.008v.008H18v-.008Zm0 3h.008v.008H18v-.008Z" />
+                ),
+                wrap: "bg-primary-light text-primary",
+              },
+              {
+                title: "KRS",
+                desc: "Spółki i pełne dane rejestrowe.",
+                icon: (
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 18H15a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z" />
+                ),
+                wrap: "bg-primary-light text-primary-dark",
+              },
+              {
+                title: "VAT",
+                desc: "Biała lista MF — status czynności.",
+                icon: (
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                ),
+                wrap: "bg-teal-light text-teal-dark",
+              },
+              {
+                title: "Blockchain",
+                desc: "Ethereum Sepolia — niezmienny zapis certyfikatu.",
+                icon: (
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
+                ),
+                wrap: "bg-purple-light text-purple",
+              },
+            ].map((item) => (
+              <div
+                key={item.title}
+                className="flex flex-col rounded-2xl border border-gray-100 bg-white p-5 text-center shadow-sm sm:text-left"
+              >
+                <div
+                  className={`mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-xl sm:mx-0 ${item.wrap}`}
+                >
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                    {item.icon}
+                  </svg>
+                </div>
+                <h3 className="mb-1 text-[15px] font-medium text-gray-900">{item.title}</h3>
+                <p className="text-[13px] leading-relaxed text-gray-500">{item.desc}</p>
+              </div>
             ))}
           </div>
+          <p className="mt-8 text-center text-[11px] text-gray-400">
+            Model zgodny z kierunkiem EBSI / tożsamością rozproszoną w UE.
+          </p>
         </div>
       </section>
 
@@ -316,7 +426,7 @@ export default function Home() {
             <LogoMark size={20} />
             <span className="text-[12px] font-semibold tracking-tight">
               <span className="text-gray-700">Silesia</span>
-              <span className="text-[#185FA5]">ID</span>
+              <span className="text-primary">ID</span>
             </span>
           </span>
           <span className="text-[11px] text-gray-400">ETHSilesia 2026 · Katowice</span>

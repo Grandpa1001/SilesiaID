@@ -1,6 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import dynamic from "next/dynamic";
+import dokumentyData from "../../public/dokumenty.json";
+import pracaData from "../../public/praca.json";
+
+const Lottie = dynamic(() => import("lottie-react"), { ssr: false });
 
 const OLD_STEPS = [
   "Zapytanie o NIP / KRS",
@@ -33,46 +38,46 @@ export default function OnboardingAnimation() {
   useEffect(() => {
     if (!running) return;
 
-    let i = 0;
-    let j = 0;
-    const intervals: ReturnType<typeof setTimeout>[] = [];
+    const timers: ReturnType<typeof setTimeout>[] = [];
 
-    // Old steps appear every 650ms
     for (let k = 1; k <= OLD_STEPS.length; k++) {
-      intervals.push(
-        setTimeout(() => setOldVisible(k), k * 650)
-      );
+      timers.push(setTimeout(() => setOldVisible(k), k * 650));
     }
-
-    // New steps appear every 800ms but offset by 200ms
     for (let k = 1; k <= NEW_STEPS.length; k++) {
-      intervals.push(
-        setTimeout(() => setNewVisible(k), 200 + k * 800)
-      );
+      timers.push(setTimeout(() => setNewVisible(k), 200 + k * 800));
     }
-
-    // Show done marker after new steps finish
-    intervals.push(
+    timers.push(
       setTimeout(() => {
         setDone(true);
         setRunning(false);
       }, 200 + NEW_STEPS.length * 800 + 600)
     );
 
-    return () => intervals.forEach(clearTimeout);
+    return () => timers.forEach(clearTimeout);
   }, [running]);
 
   return (
     <div className="space-y-4">
       <div className="grid gap-4 sm:grid-cols-2">
-        {/* Old way */}
-        <div className="rounded-xl border border-[#FAEEDA] bg-white p-5">
+        {/* Tradycyjny sposób */}
+        <div className="flex flex-col rounded-2xl border border-amber-light bg-white p-5 shadow-sm">
           <div className="mb-4 flex items-center gap-2">
-            <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#FAEEDA] text-[11px] font-medium text-[#854F0B]">!</span>
+            <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-amber-light text-[11px] font-medium text-amber">
+              !
+            </span>
             <span className="text-[13px] font-medium text-gray-700">Tradycyjny sposób</span>
             <span className="ml-auto text-[11px] text-gray-400">~3–5 dni</span>
           </div>
-          <ul className="space-y-2">
+
+          <div className="flex justify-center">
+            <Lottie
+              animationData={dokumentyData}
+              loop
+              className="w-full max-w-[220px]"
+            />
+          </div>
+
+          <ul className="mt-4 space-y-2">
             {OLD_STEPS.map((step, idx) => (
               <li
                 key={step}
@@ -80,26 +85,38 @@ export default function OnboardingAnimation() {
                   oldVisible > idx ? "opacity-100 text-gray-700" : "opacity-0"
                 }`}
               >
-                <span className="mt-0.5 h-1.5 w-1.5 rounded-full bg-[#854F0B] shrink-0" />
+                <span className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-amber" />
                 {step}
               </li>
             ))}
           </ul>
+
           {oldVisible >= OLD_STEPS.length && (
-            <div className="mt-4 rounded-lg bg-[#FAEEDA] px-3 py-2 text-[12px] font-medium text-[#854F0B]">
+            <div className="mt-4 rounded-lg bg-amber-light px-3 py-2 text-[12px] font-medium text-amber">
               Łącznie: 3–5 dni roboczych
             </div>
           )}
         </div>
 
-        {/* New way */}
-        <div className="rounded-xl border border-[#E1F5EE] bg-white p-5">
+        {/* SilesiaID */}
+        <div className="flex flex-col rounded-2xl border border-teal-light bg-white p-5 shadow-sm">
           <div className="mb-4 flex items-center gap-2">
-            <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#E1F5EE] text-[11px] font-medium text-[#1D9E75]">✓</span>
+            <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-teal-light text-[11px] font-medium text-teal">
+              ✓
+            </span>
             <span className="text-[13px] font-medium text-gray-700">SilesiaID</span>
             <span className="ml-auto text-[11px] text-gray-400">~3 minuty</span>
           </div>
-          <ul className="space-y-2">
+
+          <div className="flex justify-center">
+            <Lottie
+              animationData={pracaData}
+              loop
+              className="w-full max-w-[220px]"
+            />
+          </div>
+
+          <ul className="mt-4 space-y-2">
             {NEW_STEPS.map((step, idx) => (
               <li
                 key={step}
@@ -107,13 +124,14 @@ export default function OnboardingAnimation() {
                   newVisible > idx ? "opacity-100 text-gray-700" : "opacity-0"
                 }`}
               >
-                <span className="mt-0.5 h-1.5 w-1.5 rounded-full bg-[#1D9E75] shrink-0" />
+                <span className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-teal" />
                 {step}
               </li>
             ))}
           </ul>
+
           {done && (
-            <div className="mt-4 rounded-lg bg-[#E1F5EE] px-3 py-2 text-[12px] font-medium text-[#085041]">
+            <div className="mt-4 rounded-lg bg-teal-light px-3 py-2 text-[12px] font-medium text-teal-dark">
               Gotowe — certyfikat z kodem QR ✓
             </div>
           )}
@@ -125,7 +143,7 @@ export default function OnboardingAnimation() {
           type="button"
           onClick={start}
           disabled={running}
-          className="rounded-lg border border-gray-200 bg-white px-5 py-2 text-[13px] text-gray-600 hover:bg-[#F1EFE8] transition-colors disabled:opacity-40"
+          className="rounded-lg border border-gray-200 bg-white px-5 py-2 text-[13px] text-gray-600 transition-colors hover:bg-surface disabled:opacity-40"
         >
           {running ? "Animacja trwa..." : "Uruchom animację ▶"}
         </button>
