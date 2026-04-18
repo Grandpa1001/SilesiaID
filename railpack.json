@@ -4,12 +4,5 @@
   "packages": {
     "node": "22"
   },
-  "buildAptPackages": ["python3", "make", "g++"],
-  "aptPackages": ["libstdc++6", "libgcc-s1"],
-  "build": {
-    "cmds": ["cd backend && npm ci && npm run build"]
-  },
-  "start": {
-    "cmd": "node backend/dist/index.js"
-  }
+  "buildAptPackages": ["python3", "make", "g++"]
 }
