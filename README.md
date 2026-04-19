@@ -3,6 +3,7 @@
 Jeden cyfrowy dokument zamiast stosu papierów.  
 Raz się weryfikujesz, wszędzie jesteś rozpoznany.
 
+
 ## Czym jest SilesiaID
 
 SilesiaID to infrastruktura tożsamości biznesowej:
@@ -109,6 +110,16 @@ SilesiaID/
 
 - **Backend:** Railway — root directory `backend`, zmienne env w dashboardzie
 - **Frontend:** Vercel — root directory `frontend`, zmienne `NEXT_PUBLIC_*` w dashboardzie
+
+---
+
+## Licencja
+
+Kod źródłowy SilesiaID (frontend, backend, skrypty deploy, kontrakt `SilesiaID.sol` oprócz zależności zewnętrznych) jest udostępniany na licencji **GNU General Public License v3.0 only** (GPL-3.0-only). Pełny tekst licencji: plik [`LICENSE`](./LICENSE) w repozytorium.
+
+Copyright © 2026 współautorzy projektu SilesiaID.
+
+Zależności npm i biblioteki (np. OpenZeppelin, Next.js) pozostają pod **własnymi** licencjami — patrz `package-lock.json` / dokumentacja dostawców. To nie jest porada prawna; w razie dystrybucji binarnej lub integracji komercyjnej wart skonsultować się z prawnikiem.
 
 ---
 
